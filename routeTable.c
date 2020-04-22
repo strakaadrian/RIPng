@@ -20,6 +20,42 @@ struct routeTable * createRouteTable() {
     return table;
 }
 
+struct Route * addPomRoute(struct routeTable * paTable, char paOrigin, struct in6_addr paPrefix, uint8_t paPrefixLen, uint8_t paMetric) {
+   
+    if(paTable == NULL) {
+        printf("ERROR: Tabulka neexistuje");
+	return NULL;
+    }
+    
+    struct Route * route;
+    
+    route = (struct Route *)malloc(sizeof(struct Route));
+    
+    if (route == NULL) {
+	printf("ERROR: Nepodarilo sa vytvorit routu");
+	return NULL;
+    }
+    
+    route->origin = paOrigin;
+    route->prefix = paPrefix;
+    route->prefixLen = paPrefixLen;
+    route->metric = paMetric;
+    
+    struct Route * entry = paTable->head;
+    
+    if(entry == NULL) {
+        paTable->head == route;
+        route->next = NULL;
+    } else {
+        route->next = paTable->head;
+        paTable->head = route;
+    }
+    
+    paTable->count++;
+    
+    return route;
+}
+
 
 
 void destroyRouteTable(struct routeTable * paTable) {

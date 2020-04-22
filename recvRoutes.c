@@ -5,9 +5,10 @@
  */
 
 #include "recvRoutes.h"
+#include "routeTable.h"
 
 #define PORT 520
-#define IF "tap0"
+#define BUFF_SIZE 2000
 
 void * recvRoutes(void *par) {
     // dostaneme nasu strukturu s parametrami, ktore sme poslali vlaknu
@@ -72,13 +73,55 @@ void * recvRoutes(void *par) {
 	exit(EXIT_FAILURE);
     }
     
+    
     // teraz ideme pocuvat pakety
     for(;;) {
         // ukoncenie pocuvania
         if(paThrParams->exitStatus == true) {
-            
+            break;
         }
         
+        // vytvorenie pomocnej smerovace tabulky
+        struct routeTable * pomRouteTable = createRouteTable();
+        
+        char buf[BUFF_SIZE];
+	int readLen = 0;
+
+	memset(buf, 0, BUFF_SIZE);
+	int addr_len = sizeof(addr);
+	readLen = recvfrom(sock, buf, BUFF_SIZE, 0, (struct sockaddr *) &addr, &addr_len);
+        
+        //SPRACOVANIE RIPng HLAVICKY
+        // buffer ideme prerobit na RIPng strukturu 
+        struct ripHdr *hdr;
+        hdr = (struct ripHdr *)buf;
+        
+        // odcitame od celkoveho buffera velkost hlavicky
+        readLen -= sizeof(struct ripHdr);
+        
+        // teraz ideme spracovavat RIPng smerovacie zaznamy
+        struct ripEntry *entry;
+        struct ripEntry *nextHop;
+        
+        //vlozime si do entry prvu polozku
+        entry = (struct ripEntry *)hdr->entry;
+        
+        // teraz ideme v cykle spracovavat RIPng Entries
+        while(readLen >= sizeof(struct ripEntry)) {
+            //ak je metrika na 0xFF (255) tak je to nextHop
+            if(entry->metric == 255) {
+                nextHop = entry;
+            } else {
+                // zaznam pridame do pomocnej smerovacej tabulky
+                addPomRoute(pomRouteTable, 'R', entry->prefix, entry->prefixLen, entry->metric);
+            }
+        }
+        // TODO sem dat este vypisanie tabulky pre overenie 
+        
+        // TODO sem potom pojde zavolanie funkcie, ktora prerobi docasnu tabulku na normalnu teda bude kontrolovat zaznami ci sa tam uz nenachadzaju
+        
+        // znicenie pomocnej smerovacej tabulky
+        destroyRouteTable(pomRouteTable);
     }
     
     

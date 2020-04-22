@@ -28,7 +28,9 @@ extern "C" {
 #endif
 
 struct routeTable * createRouteTable();
-// TODO addRoute() - budu tu muset byt overenia
+// pridanie do pomocnej smerovacej tabulky, netreba nam next hop
+struct Route * addPomRoute(struct routeTable * paTable, char paOrigin, struct in6_addr paPrefix, uint8_t paPrefixLen, uint8_t paMetric);
+// TODO addRoute() - budu tu muset byt overenia ci uz zaznamy existuju
 // TODO printRouteTable()
 void destroyRouteTable(struct routeTable * paTable);
 
