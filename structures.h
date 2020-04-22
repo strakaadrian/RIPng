@@ -21,8 +21,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    
+    
 
-// ROZHRANIE
+//      ROZHRANIE
 struct Interface {
     struct Interface * next;
     unsigned int intId; //ID INTERFACU
