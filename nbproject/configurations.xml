@@ -4,7 +4,10 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>entriesListener.h</itemPath>
       <itemPath>interfaceTable.h</itemPath>
+      <itemPath>recvRoutes.h</itemPath>
+      <itemPath>routeTable.h</itemPath>
       <itemPath>structures.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -14,8 +17,11 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>entriesListener.c</itemPath>
       <itemPath>interfaceTable.c</itemPath>
       <itemPath>main.c</itemPath>
+      <itemPath>recvRoutes.c</itemPath>
+      <itemPath>routeTable.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -51,13 +57,26 @@
       <compileType>
         <cTool>
           <standard>3</standard>
+          <commandLine>-lpthread</commandLine>
         </cTool>
       </compileType>
+      <item path="entriesListener.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="entriesListener.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="interfaceTable.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="interfaceTable.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="recvRoutes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="recvRoutes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="routeTable.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="routeTable.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="structures.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -83,11 +102,23 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="entriesListener.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="entriesListener.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="interfaceTable.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="interfaceTable.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="recvRoutes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="recvRoutes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="routeTable.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="routeTable.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="structures.h" ex="false" tool="3" flavor2="0">
       </item>

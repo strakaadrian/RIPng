@@ -35,12 +35,15 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/entriesListener.o \
 	${OBJECTDIR}/interfaceTable.o \
-	${OBJECTDIR}/main.o
+	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/recvRoutes.o \
+	${OBJECTDIR}/routeTable.o
 
 
 # C Compiler Flags
-CFLAGS=
+CFLAGS=-lpthread
 
 # CC Compiler Flags
 CCFLAGS=
@@ -63,6 +66,11 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avs_sem: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/avs_sem ${OBJECTFILES} ${LDLIBSOPTIONS}
 
+${OBJECTDIR}/entriesListener.o: entriesListener.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/entriesListener.o entriesListener.c
+
 ${OBJECTDIR}/interfaceTable.o: interfaceTable.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -72,6 +80,16 @@ ${OBJECTDIR}/main.o: main.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.c
+
+${OBJECTDIR}/recvRoutes.o: recvRoutes.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/recvRoutes.o recvRoutes.c
+
+${OBJECTDIR}/routeTable.o: routeTable.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/routeTable.o routeTable.c
 
 # Subprojects
 .build-subprojects:

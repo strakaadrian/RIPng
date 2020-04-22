@@ -17,6 +17,7 @@
 #include <netinet/in.h>
 #include <time.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,7 +25,7 @@ extern "C" {
     
     
 
-//      ROZHRANIE
+// ROZHRANIE
 struct Interface {
     struct Interface * next;
     unsigned int intId; //ID INTERFACU
@@ -74,6 +75,14 @@ struct ripHdr {
     uint16_t empty;
     struct ripEntry entry[0];
 }__attribute__((packed));
+
+// struktura, ktora obsahuje parametre pre vlakna
+struct threadParams {
+    bool exitStatus; //ci chcem ukoncit aplikaciu
+    struct intTable * interfaces; // tabulka rozhrani
+    struct routeTable * routes; // smerovacia tabulka
+    pthread_mutex_t lock; // mutex
+};
 
 
 

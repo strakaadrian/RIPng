@@ -12,10 +12,13 @@
  */
 #include "structures.h"
 #include "interfaceTable.h"
+#include "routeTable.h"
+#include "entriesListener.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <net/if.h>
 #include <arpa/inet.h>
@@ -28,8 +31,6 @@
 int main(int argc, char** argv) {
     // vytvor tabulku rozhrani
     struct intTable * interfaces = createIntTable();
-    // vytvor smerovaciu tabulku
-    //struct routeTable routes;
     
     // nacitavame z konfiguracneho suboru
     FILE *config;
@@ -82,8 +83,58 @@ int main(int argc, char** argv) {
         memset(line, 0, LINE_SIZE);
     }
     
+    // vytvorenie struktury smerovacej tabulky
+    struct routeTable * routes = createRouteTable();
+    
+    // VYTVARANIE MUTEXU //
+    
+    // vytvorenie struktury, ktora bude obsahovat parametre pre vlakna
+    struct threadParams thrParams;
+    
+    thrParams.exitStatus = false;
+    
+    // vytvorenie mutexu
+    if (pthread_mutex_init(&thrParams.lock, NULL) != 0) 
+    { 
+        printf("Nepodarilo sa vytvorit mutex\n");
+        return(EXIT_FAILURE);
+    }
+    
+    
+    // VYTVARANIE VLAKIEN //
+    
+    // deklarovanie premennych  //
+    pthread_t thrEntries; // vlakno pre pocuvanie vstupov od uzivatela
+    //pthread_t thrRecv; // vlakno pre pocuvanie paketov a vkladanie do smerovacej tabulky
+    //pthread_t thrSend; // vlakno pre posielanie updatov
+    //pthread_t thrRouteExp; // vlakno pre kontrolu expiracie zaznamov v smerovacej tabulke
+    
+    
+    // vytvor vlakno pre pocuvanie vstupov od uzivatela
+    if(pthread_create(&thrEntries, NULL, entriesListener, &thrParams)) {
+        printf("Nepodarilo sa vytvorit vlakno\n");
+        return(EXIT_FAILURE);
+    }
+    
+    
+    
+    // znic mutex
+    pthread_mutex_destroy(&thrParams.lock);
+    
+    // joiny vlakna, vlakna na seba pockaju pri ukoncovani
+    pthread_join(thrEntries, NULL);
+    //pthread_join(thrRecv, NULL);
+    //pthread_join(thrSend, NULL);
+    //pthread_join(thrRouteExp, NULL);
+    
+    
+    
+    
     printIntTable(interfaces);
+    
+    
     destroyIntTable(interfaces);
+    destroyRouteTable(routes);
     
     fclose(config);
     
