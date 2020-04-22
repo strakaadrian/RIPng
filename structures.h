@@ -13,7 +13,6 @@
 
 #ifndef STRUCTURES_H
 #define STRUCTURES_H
-//koment8r
 
 #include <netinet/in.h>
 #include <time.h>
