@@ -14,6 +14,7 @@
 #include "interfaceTable.h"
 #include "routeTable.h"
 #include "entriesListener.h"
+#include "recvRoutes.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -105,9 +106,9 @@ int main(int argc, char** argv) {
     
     // deklarovanie premennych  //
     pthread_t thrEntries; // vlakno pre pocuvanie vstupov od uzivatela
-    //pthread_t thrRecv; // vlakno pre pocuvanie paketov a vkladanie do smerovacej tabulky
-    //pthread_t thrSend; // vlakno pre posielanie updatov
-    //pthread_t thrRouteExp; // vlakno pre kontrolu expiracie zaznamov v smerovacej tabulke
+    pthread_t thrRecv; // vlakno pre pocuvanie paketov a vkladanie do smerovacej tabulky
+    pthread_t thrSend; // vlakno pre posielanie updatov
+    pthread_t thrRouteExp; // vlakno pre kontrolu expiracie zaznamov v smerovacej tabulke
     
     
     // vytvor vlakno pre pocuvanie vstupov od uzivatela
@@ -116,18 +117,24 @@ int main(int argc, char** argv) {
         return(EXIT_FAILURE);
     }
     
+    // vytvor vlakno pre pocuvanie paketov
+    if(pthread_create(&thrRecv, NULL, recvRoutes, &thrParams)) {
+        printf("Nepodarilo sa vytvorit vlakno\n");
+        return(EXIT_FAILURE);
+    }
     
     
     // znic mutex
     pthread_mutex_destroy(&thrParams.lock);
     
-    // joiny vlakna, vlakna na seba pockaju pri ukoncovani
-    pthread_join(thrEntries, NULL);
-    //pthread_join(thrRecv, NULL);
-    //pthread_join(thrSend, NULL);
-    //pthread_join(thrRouteExp, NULL);
     
-    
+    // ak jedno z vlakien skonci, tak ukonci vsetky ostatne
+    if( (pthread_join(thrEntries, NULL) == 0) || (pthread_join(thrRecv, NULL) == 0) || (pthread_join(thrSend, NULL) == 0) || (pthread_join(thrRouteExp, NULL) == 0)) {
+        pthread_cancel(thrEntries);
+        pthread_cancel(thrRecv);
+        pthread_cancel(thrSend);
+        pthread_cancel(thrRouteExp);
+    }
     
     
     printIntTable(interfaces);

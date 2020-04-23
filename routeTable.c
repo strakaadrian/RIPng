@@ -56,6 +56,35 @@ struct Route * addPomRoute(struct routeTable * paTable, char paOrigin, struct in
     return route;
 }
 
+// vypisanie pomocnej smerovacej tabluky | len pre testovacie uceli
+void printPomRouteTable(struct routeTable * paTable) {
+    if(paTable == NULL) {
+        printf("ERROR: Tabulka neexistuje");
+	return;
+    }
+    
+    struct Route * route = NULL;
+	route = paTable->head;
+
+	printf("| Origin |         Address        | Length | Metric\n");
+
+	while(route != NULL) {
+                char prefix[INET6_ADDRSTRLEN];
+            
+		printf("| %c |", route->origin);
+
+		inet_ntop(AF_INET6, &route->prefix, prefix, sizeof(prefix));
+                printf(" %s |", prefix);
+                
+		printf("   %hhu   |", route->prefixLen);
+ 
+                printf("  %hhu \n", route->metric);
+
+		route = route->next;
+	}
+    
+}
+
 
 
 void destroyRouteTable(struct routeTable * paTable) {

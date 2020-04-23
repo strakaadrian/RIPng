@@ -7,7 +7,7 @@
 #include "recvRoutes.h"
 #include "routeTable.h"
 
-#define PORT 520
+#define PORT 521
 #define BUFF_SIZE 2000
 
 void * recvRoutes(void *par) {
@@ -41,6 +41,7 @@ void * recvRoutes(void *par) {
     if(bind(sock, (struct sockaddr *)&addr, sizeof(addr)) == -1)
     {
 	printf("Nepodarilo sa priradit socket k adrese");
+        perror("Error: ");
         pthread_mutex_lock(&paThrParams->lock); // zamkni mutex
         paThrParams->exitStatus = true;
         pthread_mutex_unlock(&paThrParams->lock);
@@ -116,14 +117,12 @@ void * recvRoutes(void *par) {
                 addPomRoute(pomRouteTable, 'R', entry->prefix, entry->prefixLen, entry->metric);
             }
         }
-        // TODO sem dat este vypisanie tabulky pre overenie 
+        // TODO sem dat este vypisanie tabulky pre overenie
+        printPomRouteTable(pomRouteTable);
         
         // TODO sem potom pojde zavolanie funkcie, ktora prerobi docasnu tabulku na normalnu teda bude kontrolovat zaznami ci sa tam uz nenachadzaju
         
         // znicenie pomocnej smerovacej tabulky
         destroyRouteTable(pomRouteTable);
     }
-    
-    
-    
 }
