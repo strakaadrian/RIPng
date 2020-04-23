@@ -65,6 +65,8 @@ void * recvRoutes(void *par) {
 	exit(EXIT_FAILURE);
     }
     
+    //TODO musime joinovat podle int tabulky vsetky interfacy ktore su zapojene takze nejake FOR
+    
     // nastavenie parametrov pre SOCK, to su nejake dodatocne parametre, ktore vieme pre socket nastavit
     if(setsockopt(sock, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, &multicast, sizeof(struct ipv6_mreq) ) == -1) {
         printf("Nepodarilo sa priradit dodatocne parametre socketu");
