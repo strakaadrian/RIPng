@@ -44,7 +44,7 @@ struct Route * addPomRoute(struct routeTable * paTable, char paOrigin, struct in
     struct Route * entry = paTable->head;
     
     if(entry == NULL) {
-        paTable->head == route;
+        paTable->head = route;
         route->next = NULL;
     } else {
         route->next = paTable->head;

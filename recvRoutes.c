@@ -51,7 +51,7 @@ void * recvRoutes(void *par) {
     // potrebujeme pridat do multicastovej skupiny
     struct ipv6_mreq multicast;
     memset(&multicast, 0, sizeof(multicast));
-    multicast.ipv6mr_multiaddr = in6addr_any; // chceme pocuvat na hociktorom rozhrani
+    //multicast.ipv6mr_multiaddr = in6addr_any; // chceme pocuvat na hociktorom rozhrani
     
     
     multicast.ipv6mr_interface = 0; // vsetky rozhrania
@@ -116,6 +116,7 @@ void * recvRoutes(void *par) {
                 // zaznam pridame do pomocnej smerovacej tabulky
                 addPomRoute(pomRouteTable, 'R', entry->prefix, entry->prefixLen, entry->metric);
             }
+            readLen -= sizeof(struct ripEntry);
         }
         // TODO sem dat este vypisanie tabulky pre overenie
         printPomRouteTable(pomRouteTable);
