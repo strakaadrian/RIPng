@@ -81,6 +81,7 @@ struct threadParams {
     bool exitStatus; //ci chcem ukoncit aplikaciu
     struct intTable * interfaces; // tabulka rozhrani
     struct routeTable * routes; // smerovacia tabulka
+    char intName[10]; // MENU INTRFACU
     pthread_mutex_t lock; // mutex
 };
 

@@ -32,6 +32,17 @@ void * recvRoutes(void *par) {
 	exit(EXIT_FAILURE);
     }
     
+    // potrebujeme socketu nastavit aby pocuvalo viacero socketov na rovnakom porte
+    
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &(int){1}, sizeof(int)) < 0)
+    { 
+	printf("Nepodarilo sa priradit moznosti socketu");
+        pthread_mutex_lock(&paThrParams->lock); // zamkni mutex
+        paThrParams->exitStatus = true;
+        pthread_mutex_unlock(&paThrParams->lock);
+	exit(EXIT_FAILURE);
+    }
+    
     memset(&addr, 0, sizeof(addr));
     addr.sin6_family  = AF_INET6;
     addr.sin6_port = htons(PORT);
@@ -54,7 +65,7 @@ void * recvRoutes(void *par) {
     //multicast.ipv6mr_multiaddr = in6addr_any; // chceme pocuvat na hociktorom rozhrani
     
     
-    multicast.ipv6mr_interface = 0; // vsetky rozhrania
+    multicast.ipv6mr_interface = if_nametoindex(paThrParams->intName); // vsetky rozhrania
     
     // chceme sa joinut do tejto multicastovej skupiny, lebo tam RIP posiela pakety
     if(inet_pton(AF_INET6, "ff02::9", &multicast.ipv6mr_multiaddr) == 0) {
@@ -94,11 +105,6 @@ void * recvRoutes(void *par) {
 	int addr_len = sizeof(addr);
 	readLen = recvfrom(sock, buf, BUFF_SIZE, 0, (struct sockaddr *) &addr, &addr_len);
         
-        char *ip;
-        inet_ntop(AF_INET6, &addr.sin6_addr, ip, INET6_ADDRSTRLEN);
-        
-        printf("RIPng from: %s:\n", ip);
-        
         //SPRACOVANIE RIPng HLAVICKY
         // buffer ideme prerobit na RIPng strukturu 
         struct ripHdr *hdr;
@@ -124,6 +130,8 @@ void * recvRoutes(void *par) {
                 addPomRoute(pomRouteTable, 'R', entry->prefix, entry->prefixLen, entry->metric);
             }
             readLen -= sizeof(struct ripEntry);
+            //posuniem sa na dalsiu polozku
+            entry++;
         }
         // TODO sem dat este vypisanie tabulky pre overenie
         printPomRouteTable(pomRouteTable);

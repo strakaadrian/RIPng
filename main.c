@@ -25,6 +25,7 @@
 #include <arpa/inet.h>
 
 #define LINE_SIZE 250
+#define RECV_NUMB 5
 
 /*
  * 
@@ -89,10 +90,12 @@ int main(int argc, char** argv) {
     
     // VYTVARANIE MUTEXU //
     
+    //TODO mozno odstranit tuto strukturu
     // vytvorenie struktury, ktora bude obsahovat parametre pre vlakna
     struct threadParams thrParams;
-    
     thrParams.exitStatus = false;
+    thrParams.routes = routes;
+    thrParams.interfaces = interfaces;
     
     // vytvorenie mutexu
     if (pthread_mutex_init(&thrParams.lock, NULL) != 0) 
@@ -101,15 +104,13 @@ int main(int argc, char** argv) {
         return(EXIT_FAILURE);
     }
     
-    
     // VYTVARANIE VLAKIEN //
     
     // deklarovanie premennych  //
     pthread_t thrEntries; // vlakno pre pocuvanie vstupov od uzivatela
-    pthread_t thrRecv; // vlakno pre pocuvanie paketov a vkladanie do smerovacej tabulky
+    pthread_t thrRecv[RECV_NUMB]; // vlakna pre pocuvanie paketov a vkladanie do smerovacej tabulky
     pthread_t thrSend; // vlakno pre posielanie updatov
     pthread_t thrRouteExp; // vlakno pre kontrolu expiracie zaznamov v smerovacej tabulke
-    
     
     // vytvor vlakno pre pocuvanie vstupov od uzivatela
     if(pthread_create(&thrEntries, NULL, entriesListener, &thrParams)) {
@@ -117,17 +118,57 @@ int main(int argc, char** argv) {
         return(EXIT_FAILURE);
     }
     
-    // vytvor vlakno pre pocuvanie paketov
-    if(pthread_create(&thrRecv, NULL, recvRoutes, &thrParams)) {
-        printf("Nepodarilo sa vytvorit vlakno\n");
+    // pocitadlo pre nasledujuci cyklus
+    int counter = 0;
+    // pole struktur parametrov pre vlakna
+    struct threadParams thrParamsArr[10];
+    
+    // pre kazdy interface, na ktorom sme zapli RIPng budeme spustat nove vlakno, ktore bude pocuvat
+    if(interfaces->count == 0) {
+        printf("Nemame priradene ziadne interfacy\n");
         return(EXIT_FAILURE);
+    } else {
+        // vytvotime pomocny interface
+        struct Interface * interface; 
+        
+        // pridame prvy interface
+        interface = interfaces->head;
+        
+        // prebiehami interfaci a zistujeme ci je na nich RIPng ak ano vytvorime vlakno
+        while(interface != NULL) {     
+            
+            if(interface->rip == true) {
+                // pripravime si strukturu pre parametre
+                struct threadParams thrRecvParams;
+                memset(&thrRecvParams, 0, sizeof(thrRecvParams));
+                
+                strcpy(thrRecvParams.intName, interface->intName);
+                thrRecvParams.exitStatus = false;
+                thrRecvParams.routes = routes;
+                thrRecvParams.interfaces = interfaces;
+                
+                // pre kazde vlakno si pripravime ja parametre
+                thrParamsArr[counter] = thrRecvParams;
+                
+                // vytvor vlakno pre pocuvanie paketov
+                if(pthread_create(&thrRecv[counter], NULL, recvRoutes, &thrParamsArr[counter])) {
+                    printf("Nepodarilo sa vytvorit vlakno\n");
+                    return(EXIT_FAILURE);
+                } 
+            }
+            counter++;
+            interface = interface->next;
+        }      
     }
     
     
     // znic mutex
     pthread_mutex_destroy(&thrParams.lock);
     
+
+    pthread_join(thrEntries, NULL);
     
+    /*
     // ak jedno z vlakien skonci, tak ukonci vsetky ostatne
     if( (pthread_join(thrEntries, NULL) == 0) || (pthread_join(thrRecv, NULL) == 0) || (pthread_join(thrSend, NULL) == 0) || (pthread_join(thrRouteExp, NULL) == 0)) {
         pthread_cancel(thrEntries);
@@ -135,10 +176,9 @@ int main(int argc, char** argv) {
         pthread_cancel(thrSend);
         pthread_cancel(thrRouteExp);
     }
-    
+    */ 
     
     printIntTable(interfaces);
-    
     
     destroyIntTable(interfaces);
     destroyRouteTable(routes);
