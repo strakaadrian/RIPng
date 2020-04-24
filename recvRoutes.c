@@ -94,6 +94,11 @@ void * recvRoutes(void *par) {
 	int addr_len = sizeof(addr);
 	readLen = recvfrom(sock, buf, BUFF_SIZE, 0, (struct sockaddr *) &addr, &addr_len);
         
+        char *ip;
+        inet_ntop(AF_INET6, &addr.sin6_addr, ip, INET6_ADDRSTRLEN);
+        
+        printf("RIPng from: %s:\n", ip);
+        
         //SPRACOVANIE RIPng HLAVICKY
         // buffer ideme prerobit na RIPng strukturu 
         struct ripHdr *hdr;
