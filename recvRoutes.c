@@ -33,7 +33,6 @@ void * recvRoutes(void *par) {
     }
     
     // potrebujeme socketu nastavit aby pocuvalo viacero socketov na rovnakom porte
-    
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &(int){1}, sizeof(int)) < 0)
     { 
 	printf("Nepodarilo sa priradit moznosti socketu");
@@ -42,11 +41,20 @@ void * recvRoutes(void *par) {
         pthread_mutex_unlock(&paThrParams->lock);
 	exit(EXIT_FAILURE);
     }
-    
+
     memset(&addr, 0, sizeof(addr));
     addr.sin6_family  = AF_INET6;
     addr.sin6_port = htons(PORT);
-    addr.sin6_addr = paThrParams->prefix; // pocuvaj na vsetkych rozhraniach
+    
+    // nastavime socketu aby pocuval na specifickom porte
+    if (setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, paThrParams->intName, 10) < 0)
+    { 
+	printf("Nepodarilo sa priradit moznosti socketu");
+        pthread_mutex_lock(&paThrParams->lock); // zamkni mutex
+        paThrParams->exitStatus = true;
+        pthread_mutex_unlock(&paThrParams->lock);
+	exit(EXIT_FAILURE);
+    }
     
     // priradenie parametrov vysie nastavenych k socketu
     if(bind(sock, (struct sockaddr *)&addr, sizeof(addr)) == -1)
@@ -63,7 +71,6 @@ void * recvRoutes(void *par) {
     struct ipv6_mreq multicast;
     memset(&multicast, 0, sizeof(multicast));
     //multicast.ipv6mr_multiaddr = in6addr_any; // chceme pocuvat na hociktorom rozhrani
-    
     
     multicast.ipv6mr_interface = if_nametoindex(paThrParams->intName); // vsetky rozhrania
     
@@ -86,8 +93,7 @@ void * recvRoutes(void *par) {
         pthread_mutex_unlock(&paThrParams->lock);
 	exit(EXIT_FAILURE);
     }
-    
-    
+ 
     // teraz ideme pocuvat pakety
     for(;;) {
         // ukoncenie pocuvania
@@ -133,6 +139,7 @@ void * recvRoutes(void *par) {
             //posuniem sa na dalsiu polozku
             entry++;
         }
+        
         // TODO sem dat este vypisanie tabulky pre overenie
         printPomRouteTable(pomRouteTable);
         
