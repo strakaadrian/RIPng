@@ -85,16 +85,16 @@ int main(int argc, char** argv) {
         memset(line, 0, LINE_SIZE);
     }
     
+    //zavri subor, z ktoreho sme citali
+    fclose(config);
+    
     // vytvorenie struktury smerovacej tabulky
     struct routeTable * routes = createRouteTable();
     
     // VYTVARANIE MUTEXU //
     
-    //TODO mozno odstranit tuto strukturu
     // vytvorenie struktury, ktora bude obsahovat parametre pre vlakna
     struct threadParams thrParams;
-    thrParams.routes = routes;
-    thrParams.interfaces = interfaces;
     
     // vytvorenie mutexu
     if (pthread_mutex_init(&thrParams.lock, NULL) != 0) 
@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
     pthread_t thrRouteExp; // vlakno pre kontrolu expiracie zaznamov v smerovacej tabulke
     
     // vytvor vlakno pre pocuvanie vstupov od uzivatela
-    if(pthread_create(&thrEntries, NULL, entriesListener, &thrParams)) {
+    if(pthread_create(&thrEntries, NULL, entriesListener, NULL)) {
         printf("Nepodarilo sa vytvorit vlakno\n");
         return(EXIT_FAILURE);
     }
@@ -159,31 +159,28 @@ int main(int argc, char** argv) {
         }      
     }
     
-    
     // znic mutex
     pthread_mutex_destroy(&thrParams.lock);
     
-
-    pthread_join(thrEntries, NULL);
-    
-    //TODO dorobit ukoncenie vsetkych vlakoien cez pthread_cancel
-    
-    /*
-    // ak jedno z vlakien skonci, tak ukonci vsetky ostatne
-    if( (pthread_join(thrEntries, NULL) == 0) || (pthread_join(thrRecv, NULL) == 0) || (pthread_join(thrSend, NULL) == 0) || (pthread_join(thrRouteExp, NULL) == 0)) {
-        pthread_cancel(thrEntries);
-        pthread_cancel(thrRecv);
-        pthread_cancel(thrSend);
-        pthread_cancel(thrRouteExp);
+    // ak joineme vlakno pre pocuvanie od usera tak znicime vsetky ostatne vlakna
+    if(pthread_join(thrEntries, NULL) == 0) {
+        //TODO odkomentovat
+        //pthread_cancel(thrSend);
+        //pthread_cancel(thrRouteExp);
+        
+        // znicime vsetky vlakna pre pocuvanie 
+        for (int i = 0; i < counter; i++) {
+            pthread_cancel(thrRecv[i]);
+        }
     }
-    */ 
-    
+
+
     printIntTable(interfaces);
     
     destroyIntTable(interfaces);
     destroyRouteTable(routes);
     
-    fclose(config);
+    
     
     return (EXIT_SUCCESS);
 }

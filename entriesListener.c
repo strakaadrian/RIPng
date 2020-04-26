@@ -9,10 +9,7 @@
 #define INPUT_SIZE 200
 #define COMM_SIZE 20
 
-void *entriesListener(void *par) {
-    // dostaneme nasu strukturu s parametrami, ktore sme poslali vlaknu
-    struct threadParams * paThrParams = (struct threadParams *) par;
-    
+void *entriesListener(void *unused) {
     char input[INPUT_SIZE]; // vstup od uzivatela
     memset(&input, 0, INPUT_SIZE);
     
