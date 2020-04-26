@@ -46,7 +46,7 @@ void * recvRoutes(void *par) {
     memset(&addr, 0, sizeof(addr));
     addr.sin6_family  = AF_INET6;
     addr.sin6_port = htons(PORT);
-    addr.sin6_addr = in6addr_any; // pocuvaj na vsetkych rozhraniach
+    addr.sin6_addr = paThrParams->prefix; // pocuvaj na vsetkych rozhraniach
     
     // priradenie parametrov vysie nastavenych k socketu
     if(bind(sock, (struct sockaddr *)&addr, sizeof(addr)) == -1)

@@ -82,6 +82,7 @@ struct threadParams {
     struct intTable * interfaces; // tabulka rozhrani
     struct routeTable * routes; // smerovacia tabulka
     char intName[10]; // MENU INTRFACU
+    struct in6_addr prefix; // IPv6 ADRESA
     pthread_mutex_t lock; // mutex
 };
 

@@ -146,6 +146,7 @@ int main(int argc, char** argv) {
                 thrRecvParams.exitStatus = false;
                 thrRecvParams.routes = routes;
                 thrRecvParams.interfaces = interfaces;
+                thrRecvParams.prefix = interface->prefix;
                 
                 // pre kazde vlakno si pripravime ja parametre
                 thrParamsArr[counter] = thrRecvParams;
