@@ -159,9 +159,6 @@ int main(int argc, char** argv) {
         }      
     }
     
-    // znic mutex
-    pthread_mutex_destroy(&thrParams.lock);
-    
     // ak joineme vlakno pre pocuvanie od usera tak znicime vsetky ostatne vlakna
     if(pthread_join(thrEntries, NULL) == 0) {
         //TODO odkomentovat
@@ -174,6 +171,10 @@ int main(int argc, char** argv) {
         }
     }
 
+    // znic mutex
+    pthread_mutex_destroy(&thrParams.lock);
+    
+    
 
     printIntTable(interfaces);
     
