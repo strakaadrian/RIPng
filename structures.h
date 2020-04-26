@@ -78,11 +78,9 @@ struct ripHdr {
 
 // struktura, ktora obsahuje parametre pre vlakna
 struct threadParams {
-    bool exitStatus; //ci chcem ukoncit aplikaciu
     struct intTable * interfaces; // tabulka rozhrani
     struct routeTable * routes; // smerovacia tabulka
     char intName[10]; // MENU INTRFACU
-    struct in6_addr prefix; // IPv6 ADRESA
     pthread_mutex_t lock; // mutex
 };
 

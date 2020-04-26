@@ -93,7 +93,6 @@ int main(int argc, char** argv) {
     //TODO mozno odstranit tuto strukturu
     // vytvorenie struktury, ktora bude obsahovat parametre pre vlakna
     struct threadParams thrParams;
-    thrParams.exitStatus = false;
     thrParams.routes = routes;
     thrParams.interfaces = interfaces;
     
@@ -143,10 +142,8 @@ int main(int argc, char** argv) {
                 memset(&thrRecvParams, 0, sizeof(thrRecvParams));
                 
                 strcpy(thrRecvParams.intName, interface->intName);
-                thrRecvParams.exitStatus = false;
                 thrRecvParams.routes = routes;
                 thrRecvParams.interfaces = interfaces;
-                thrRecvParams.prefix = interface->prefix;
                 
                 // pre kazde vlakno si pripravime ja parametre
                 thrParamsArr[counter] = thrRecvParams;
@@ -168,6 +165,8 @@ int main(int argc, char** argv) {
     
 
     pthread_join(thrEntries, NULL);
+    
+    //TODO dorobit ukoncenie vsetkych vlakoien cez pthread_cancel
     
     /*
     // ak jedno z vlakien skonci, tak ukonci vsetky ostatne

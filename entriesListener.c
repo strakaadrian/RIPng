@@ -22,13 +22,8 @@ void *entriesListener(void *par) {
     
     // v nekonecnom cykle pocuvame vstupy od uzivatela 
     for(;;) {
-        // overenie ci ine vlakno neskoncilo neocakavane
-        if(paThrParams->exitStatus == true) {
-            break;
-        } else {
-            // nacitavaj vstup od usera
-            fgets(input, INPUT_SIZE, stdin);
-        }
+        // nacitavaj vstup od usera
+        fgets(input, INPUT_SIZE, stdin);
         
         // z fgets vstupu odrezeme NEWLINE charakter
         strtok(input, "\n");
@@ -42,9 +37,6 @@ void *entriesListener(void *par) {
         
         // ak chce uzivatel vypnut smerovac
         if(strcmp(input, "exit") == 0) {
-            pthread_mutex_lock(&paThrParams->lock); // zamkni mutex
-            paThrParams->exitStatus = true;
-            pthread_mutex_unlock(&paThrParams->lock);
             break;
         }
         

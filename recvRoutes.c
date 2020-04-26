@@ -26,9 +26,6 @@ void * recvRoutes(void *par) {
     if(sock == -1)
     { 
 	printf("Nepodarilo sa vytvorit socket pre pocuvanie");
-        pthread_mutex_lock(&paThrParams->lock); // zamkni mutex
-        paThrParams->exitStatus = true;
-        pthread_mutex_unlock(&paThrParams->lock);
 	exit(EXIT_FAILURE);
     }
     
@@ -36,9 +33,6 @@ void * recvRoutes(void *par) {
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEPORT, &(int){1}, sizeof(int)) < 0)
     { 
 	printf("Nepodarilo sa priradit moznosti socketu");
-        pthread_mutex_lock(&paThrParams->lock); // zamkni mutex
-        paThrParams->exitStatus = true;
-        pthread_mutex_unlock(&paThrParams->lock);
 	exit(EXIT_FAILURE);
     }
 
@@ -46,13 +40,10 @@ void * recvRoutes(void *par) {
     addr.sin6_family  = AF_INET6;
     addr.sin6_port = htons(PORT);
     
-    // nastavime socketu aby pocuval na specifickom porte
+    // nastavime socketu aby pocuval na specifickom interfaci
     if (setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, paThrParams->intName, 10) < 0)
     { 
 	printf("Nepodarilo sa priradit moznosti socketu");
-        pthread_mutex_lock(&paThrParams->lock); // zamkni mutex
-        paThrParams->exitStatus = true;
-        pthread_mutex_unlock(&paThrParams->lock);
 	exit(EXIT_FAILURE);
     }
     
@@ -61,9 +52,6 @@ void * recvRoutes(void *par) {
     {
 	printf("Nepodarilo sa priradit socket k adrese");
         perror("Error: ");
-        pthread_mutex_lock(&paThrParams->lock); // zamkni mutex
-        paThrParams->exitStatus = true;
-        pthread_mutex_unlock(&paThrParams->lock);
 	exit(EXIT_FAILURE);
     }
     
@@ -77,9 +65,6 @@ void * recvRoutes(void *par) {
     // chceme sa joinut do tejto multicastovej skupiny, lebo tam RIP posiela pakety
     if(inet_pton(AF_INET6, "ff02::9", &multicast.ipv6mr_multiaddr) == 0) {
         printf("Nepodarilo sa joinut do multicastovej skupiny");
-        pthread_mutex_lock(&paThrParams->lock); // zamkni mutex
-        paThrParams->exitStatus = true;
-        pthread_mutex_unlock(&paThrParams->lock);
 	exit(EXIT_FAILURE);
     }
     
@@ -88,19 +73,11 @@ void * recvRoutes(void *par) {
     // nastavenie parametrov pre SOCK, to su nejake dodatocne parametre, ktore vieme pre socket nastavit
     if(setsockopt(sock, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, &multicast, sizeof(struct ipv6_mreq) ) == -1) {
         printf("Nepodarilo sa priradit dodatocne parametre socketu");
-        pthread_mutex_lock(&paThrParams->lock); // zamkni mutex
-        paThrParams->exitStatus = true;
-        pthread_mutex_unlock(&paThrParams->lock);
 	exit(EXIT_FAILURE);
     }
  
     // teraz ideme pocuvat pakety
     for(;;) {
-        // ukoncenie pocuvania
-        if(paThrParams->exitStatus == true) {
-            break;
-        }
-        
         // vytvorenie pomocnej smerovace tabulky
         struct routeTable * pomRouteTable = createRouteTable();
         
