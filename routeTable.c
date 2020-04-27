@@ -47,7 +47,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
     
     struct Route * tableRoute = NULL; // smerovaci zaznam z tabulky
     char command[200];
-    char * ip;
+    char ip[INET6_ADDRSTRLEN];
     
     tableRoute = paTable->head;
 
@@ -81,7 +81,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
                
                 // teraz pridame novy smerovaci zaznam v linuxe
                 memset(command, 0, 200);
-                sprintf(command, "sudo ip -6 route add %s dev %s metric %d", ip, tableRoute->nextHopInt, tableRoute->metric);
+                sprintf(command, "sudo ip -6 route add %s/%d dev %s metric %d", ip, tableRoute->prefixLen, tableRoute->nextHopInt, tableRoute->metric);
                 // posli prikaz do linuxu
                 system(command);
                 
@@ -129,7 +129,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
     memset(command, 0, 200);
     
     //teraz musime pridat zaznam v linuxe
-    sprintf(command, "sudo ip -6 route add %s dev %s metric %d", ip, route->nextHopInt, route->metric);
+    sprintf(command, "sudo ip -6 route add %s/%d dev %s metric %d", ip, route->prefixLen, route->nextHopInt, route->metric);
     // posli prikaz do linuxu
     system(command);
     
