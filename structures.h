@@ -48,8 +48,7 @@ struct Route {
     char origin; // ODKADIAL CESTA POCHADZA, R - RIP, C - CONNECTED, '-' - INE
     struct in6_addr prefix; // IPv6 ADRESA
     uint8_t prefixLen; // ak budeme pouzivat len 128 dlzky, tento atribut nam zrejme netreba
-    struct in6_addr nextHop; // NEXT-HOP smerovac
-    uint8_t nextHopLen; // ak budeme pouzivat len 128 dlzky, tento atribut nam zrejme netreba
+    char nextHopInt[10]; // interface k nexthopu z kade prisiel packet
     uint8_t metric; // METRIKA
     time_t time; // kolko je zaznam v tabulke
 };

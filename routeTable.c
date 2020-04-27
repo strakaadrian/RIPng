@@ -20,7 +20,9 @@ struct routeTable * createRouteTable() {
     return table;
 }
 
-struct Route * addPomRoute(struct routeTable * paTable, char paOrigin, struct in6_addr paPrefix, uint8_t paPrefixLen, uint8_t paMetric) {
+
+
+struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_addr paPrefix, uint8_t paPrefixLen, uint8_t paMetric, char *paNextHopInt, pthread_mutex_t paLock) {
    
     if(paTable == NULL) {
         printf("ERROR: Tabulka neexistuje");
@@ -40,6 +42,69 @@ struct Route * addPomRoute(struct routeTable * paTable, char paOrigin, struct in
     route->prefix = paPrefix;
     route->prefixLen = paPrefixLen;
     route->metric = paMetric;
+    strncpy(route->nextHopInt, paNextHopInt, 10);
+    route->time = time(NULL);
+    
+    struct Route * tableRoute = NULL; // smerovaci zaznam z tabulky
+    char command[200];
+    char * ip;
+    
+    tableRoute = paTable->head;
+
+    // prechadzame smerovaciu tbaulku a hladame rovnaky zaznam
+    while(tableRoute != NULL) {
+          
+        //overenie ci je tam taka siet s rovnakou IP a MASKOU
+        if( (memcmp(&tableRoute->prefix, &route->prefix, sizeof(struct in6_addr)) == 0) && (tableRoute->prefixLen == route->prefixLen) && ( strcmp(tableRoute->nextHopInt, route->nextHopInt) == 0) ) {
+            // ak je tam taka siet, ale ma mensiu metriku tak zaznam pridaj za ten zaznam, ktory tam je
+            if(route->metric < tableRoute->metric) {
+                
+                //zamnkni mutex
+                pthread_mutex_lock(&paLock);
+                
+                // pridaj zaznam za uz existujuci zaznam
+                tableRoute->metric = route->metric;
+                tableRoute->time = time(NULL);
+                
+                // odomnkni mutex
+                pthread_mutex_unlock(&paLock);
+                
+                //pomocny string pe pridanie a odstranenie smerovacieho zaznamu
+                memset(command, 0, 200);
+                
+                inet_ntop(AF_INET6, &tableRoute->prefix, ip, INET6_ADDRSTRLEN);
+                
+                //teraz musime zmazat zaznam v linuxe
+                sprintf(command, "sudo ip -6 route del %s dev %s", ip, tableRoute->nextHopInt);
+                // posli prikaz do linuxu
+                system(command);
+               
+                // teraz pridame novy smerovaci zaznam v linuxe
+                memset(command, 0, 200);
+                sprintf(command, "sudo ip -6 route add %s dev %s metric", ip, tableRoute->nextHopInt, tableRoute->metric);
+                // posli prikaz do linuxu
+                system(command);
+                
+                return route;
+            } else if( (memcmp(&tableRoute->prefix, &route->prefix, sizeof(struct in6_addr)) == 0) && (tableRoute->prefixLen == route->prefixLen) && ( strcmp(tableRoute->nextHopInt, route->nextHopInt) == 0) && (tableRoute->metric == route->metric) ) {
+                // ak pride identicky zaznam len mu daj cas na aktualny nech sa mu nezmaze zaznam
+                
+                //zamnkni mutex
+                pthread_mutex_lock(&paLock);
+                
+                tableRoute->time = time(NULL);
+                
+                // odomnkni mutex
+                pthread_mutex_unlock(&paLock);
+                
+                return route;
+            }
+        }   
+        tableRoute = tableRoute->next;
+    }
+    
+    //zamnkni mutex
+    pthread_mutex_lock(&paLock);
     
     struct Route * entry = paTable->head;
     
@@ -53,6 +118,20 @@ struct Route * addPomRoute(struct routeTable * paTable, char paOrigin, struct in
     
     paTable->count++;
     
+    // odomnkni mutex
+    pthread_mutex_unlock(&paLock);
+    
+    // pridaj zaznam aj do linuxovej smerovacej tabulky
+    inet_ntop(AF_INET6, &route->prefix, ip, INET6_ADDRSTRLEN);
+    
+    // vynuluj string
+    memset(command, 0, 200);
+    
+    //teraz musime pridat zaznam v linuxe
+    sprintf(command, "sudo ip -6 route add %s dev %s", ip, route->nextHopInt);
+    // posli prikaz do linuxu
+    system(command);
+    
     return route;
 }
 
@@ -64,24 +143,24 @@ void printPomRouteTable(struct routeTable * paTable) {
     }
     
     struct Route * route = NULL;
-	route = paTable->head;
+    route = paTable->head;
 
-	printf("| Origin |         Address        | Length | Metric\n");
+    printf("| Origin |         Address        | Length | Metric\n");
 
-	while(route != NULL) {
-                char prefix[INET6_ADDRSTRLEN];
-            
-		printf("| %c |", route->origin);
+    while(route != NULL) {
+            char prefix[INET6_ADDRSTRLEN];
 
-		inet_ntop(AF_INET6, &route->prefix, prefix, sizeof(prefix));
-                printf(" %s |", prefix);
-                
-		printf("   %hhu   |", route->prefixLen);
- 
-                printf("  %hhu \n", route->metric);
+            printf("| %c |", route->origin);
 
-		route = route->next;
-	}
+            inet_ntop(AF_INET6, &route->prefix, prefix, sizeof(prefix));
+            printf(" %s |", prefix);
+
+            printf("   %hhu   |", route->prefixLen);
+
+            printf("  %hhu \n", route->metric);
+
+            route = route->next;
+    }
     
 }
 

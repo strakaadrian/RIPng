@@ -78,9 +78,6 @@ void * recvRoutes(void *par) {
  
     // teraz ideme pocuvat pakety
     for(;;) {
-        // vytvorenie pomocnej smerovace tabulky
-        struct routeTable * pomRouteTable = createRouteTable();
-        
         char buf[BUFF_SIZE];
 	int readLen = 0;
 
@@ -105,24 +102,17 @@ void * recvRoutes(void *par) {
         
         // teraz ideme v cykle spracovavat RIPng Entries
         while(readLen >= sizeof(struct ripEntry)) {
-            //ak je metrika na 0xFF (255) tak je to nextHop
-            if(entry->metric == 255) {
-                nextHop = entry;
-            } else {
-                // zaznam pridame do pomocnej smerovacej tabulky
-                addPomRoute(pomRouteTable, 'R', entry->prefix, entry->prefixLen, entry->metric);
-            }
+            
+            //TODO pridavanie do tabulky + mutex
+            
+            
+            
+            
             readLen -= sizeof(struct ripEntry);
             //posuniem sa na dalsiu polozku
             entry++;
         }
         
-        // TODO sem dat este vypisanie tabulky pre overenie
-        printPomRouteTable(pomRouteTable);
-        
-        // TODO sem potom pojde zavolanie funkcie, ktora prerobi docasnu tabulku na normalnu teda bude kontrolovat zaznami ci sa tam uz nenachadzaju
-        
-        // znicenie pomocnej smerovacej tabulky
-        destroyRouteTable(pomRouteTable);
+
     }
 }
