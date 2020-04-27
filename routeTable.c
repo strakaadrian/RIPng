@@ -22,7 +22,7 @@ struct routeTable * createRouteTable() {
 
 
 
-struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_addr paPrefix, uint8_t paPrefixLen, uint8_t paMetric, char *paNextHopInt, pthread_mutex_t paLock) {
+struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_addr paPrefix, uint8_t paPrefixLen, uint8_t paMetric, struct in6_addr paSourceIp, char *paNextHopInt, pthread_mutex_t paLock) {
    
     if(paTable == NULL) {
         printf("ERROR: Tabulka neexistuje");
@@ -48,6 +48,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
     struct Route * tableRoute = NULL; // smerovaci zaznam z tabulky
     char command[200];
     char ip[INET6_ADDRSTRLEN];
+    char sourceIp[INET6_ADDRSTRLEN];
     
     tableRoute = paTable->head;
 
@@ -73,15 +74,16 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
                 memset(command, 0, 200);
                 
                 inet_ntop(AF_INET6, &tableRoute->prefix, ip, INET6_ADDRSTRLEN);
+                inet_ntop(AF_INET6, &paSourceIp, sourceIp, INET6_ADDRSTRLEN);
                 
                 //teraz musime zmazat zaznam v linuxe
-                sprintf(command, "sudo ip -6 route del %s dev %s", ip, tableRoute->nextHopInt);
+                sprintf(command, "sudo ip -6 route del %s via %s dev %s", ip, sourceIp, tableRoute->nextHopInt);
                 // posli prikaz do linuxu
                 system(command);
                
                 // teraz pridame novy smerovaci zaznam v linuxe
                 memset(command, 0, 200);
-                sprintf(command, "sudo ip -6 route add %s/%d dev %s metric %d", ip, tableRoute->prefixLen, tableRoute->nextHopInt, tableRoute->metric);
+                sprintf(command, "sudo ip -6 route add %s/%d via %s dev %s metric %d", ip, tableRoute->prefixLen, sourceIp, tableRoute->nextHopInt, tableRoute->metric);
                 // posli prikaz do linuxu
                 system(command);
                 
@@ -124,12 +126,13 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
     
     // pridaj zaznam aj do linuxovej smerovacej tabulky
     inet_ntop(AF_INET6, &route->prefix, ip, INET6_ADDRSTRLEN);
+    inet_ntop(AF_INET6, &paSourceIp, sourceIp, INET6_ADDRSTRLEN);
     
     // vynuluj string
     memset(command, 0, 200);
     
     //teraz musime pridat zaznam v linuxe
-    sprintf(command, "sudo ip -6 route add %s/%d dev %s metric %d", ip, route->prefixLen, route->nextHopInt, route->metric);
+    sprintf(command, "sudo ip -6 route add %s/%d via %s dev %s metric %d", ip, route->prefixLen, sourceIp, route->nextHopInt, route->metric);
     // posli prikaz do linuxu
     system(command);
     

@@ -84,7 +84,7 @@ void * recvRoutes(void *par) {
 	memset(buf, 0, BUFF_SIZE);
 	int addr_len = sizeof(addr);
 	readLen = recvfrom(sock, buf, BUFF_SIZE, 0, (struct sockaddr *) &addr, &addr_len);
-        
+          
         //SPRACOVANIE RIPng HLAVICKY
         // buffer ideme prerobit na RIPng strukturu 
         struct ripHdr *hdr;
@@ -102,8 +102,14 @@ void * recvRoutes(void *par) {
         
         // teraz ideme v cykle spracovavat RIPng Entries
         while(readLen >= sizeof(struct ripEntry)) {
-
-            addRoute(paThrParams->routes, 'R', entry->prefix, entry->prefixLen, entry->metric, paThrParams->intName, paThrParams->lock);
+            
+            if(entry->metric < 16) {
+                // zvys metriku o 1
+                entry->metric++;
+                
+                addRoute(paThrParams->routes, 'R', entry->prefix, entry->prefixLen, entry->metric, addr.sin6_addr ,paThrParams->intName, paThrParams->lock);
+            }
+            
             
             readLen -= sizeof(struct ripEntry);
             //posuniem sa na dalsiu polozku
