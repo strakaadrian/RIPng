@@ -81,11 +81,12 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
                
                 // teraz pridame novy smerovaci zaznam v linuxe
                 memset(command, 0, 200);
-                sprintf(command, "sudo ip -6 route add %s dev %s metric", ip, tableRoute->nextHopInt, tableRoute->metric);
+                sprintf(command, "sudo ip -6 route add %s dev %s metric %d", ip, tableRoute->nextHopInt, tableRoute->metric);
                 // posli prikaz do linuxu
                 system(command);
                 
                 return route;
+                
             } else if( (memcmp(&tableRoute->prefix, &route->prefix, sizeof(struct in6_addr)) == 0) && (tableRoute->prefixLen == route->prefixLen) && ( strcmp(tableRoute->nextHopInt, route->nextHopInt) == 0) && (tableRoute->metric == route->metric) ) {
                 // ak pride identicky zaznam len mu daj cas na aktualny nech sa mu nezmaze zaznam
                 
@@ -128,7 +129,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
     memset(command, 0, 200);
     
     //teraz musime pridat zaznam v linuxe
-    sprintf(command, "sudo ip -6 route add %s dev %s", ip, route->nextHopInt);
+    sprintf(command, "sudo ip -6 route add %s dev %s metric %d", ip, route->nextHopInt, route->metric);
     // posli prikaz do linuxu
     system(command);
     

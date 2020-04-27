@@ -102,11 +102,8 @@ void * recvRoutes(void *par) {
         
         // teraz ideme v cykle spracovavat RIPng Entries
         while(readLen >= sizeof(struct ripEntry)) {
-            
-            //TODO pridavanie do tabulky + mutex
-            
-            
-            
+
+            addRoute(paThrParams->routes, 'R', entry->prefix, entry->prefixLen, entry->metric, paThrParams->intName, paThrParams->lock);
             
             readLen -= sizeof(struct ripEntry);
             //posuniem sa na dalsiu polozku
