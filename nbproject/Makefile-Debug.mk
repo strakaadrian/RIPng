@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/interfaceTable.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/recvRoutes.o \
+	${OBJECTDIR}/routeExpiration.o \
 	${OBJECTDIR}/routeTable.o
 
 
@@ -85,6 +86,11 @@ ${OBJECTDIR}/recvRoutes.o: recvRoutes.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/recvRoutes.o recvRoutes.c
+
+${OBJECTDIR}/routeExpiration.o: routeExpiration.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/routeExpiration.o routeExpiration.c
 
 ${OBJECTDIR}/routeTable.o: routeTable.c
 	${MKDIR} -p ${OBJECTDIR}

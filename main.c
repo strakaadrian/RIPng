@@ -15,6 +15,7 @@
 #include "routeTable.h"
 #include "entriesListener.h"
 #include "recvRoutes.h"
+#include "routeExpiration.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -95,15 +96,17 @@ int main(int argc, char** argv) {
     
     // vytvorenie struktury, ktora bude obsahovat parametre pre vlakna
     struct threadParams thrParams;
-    thrParams.routes = routes;
-    thrParams.interfaces = interfaces;
-    
+
     // vytvorenie mutexu
     if (pthread_mutex_init(&thrParams.lock, NULL) != 0) 
     { 
         printf("Nepodarilo sa vytvorit mutex\n");
         return(EXIT_FAILURE);
     }
+
+    // naplnenie premennych
+    thrParams.routes = routes;
+    thrParams.interfaces = interfaces;
     
     // VYTVARANIE VLAKIEN //
     
@@ -113,11 +116,20 @@ int main(int argc, char** argv) {
     pthread_t thrSend; // vlakno pre posielanie updatov
     pthread_t thrRouteExp; // vlakno pre kontrolu expiracie zaznamov v smerovacej tabulke
     
+    
     // vytvor vlakno pre pocuvanie vstupov od uzivatela
     if(pthread_create(&thrEntries, NULL, entriesListener, &thrParams)) {
         printf("Nepodarilo sa vytvorit vlakno\n");
         return(EXIT_FAILURE);
     }
+    
+    
+    //kontrolu expiracie zaznamu v smerovacej tabulke
+    if(pthread_create(&thrRouteExp, NULL, checkExpiration, &thrParams)) {
+        printf("Nepodarilo sa vytvorit vlakno\n");
+        return(EXIT_FAILURE);
+    }
+    
     
     // pocitadlo pre nasledujuci cyklus
     int counter = 0;
@@ -162,6 +174,12 @@ int main(int argc, char** argv) {
         }      
     }
     
+    
+    //TODO pridaj vlakno pre posielanie
+    
+    
+    
+    
     // ak joineme vlakno pre pocuvanie od usera tak znicime vsetky ostatne vlakna
     if(pthread_join(thrEntries, NULL) == 0) {
         //TODO odkomentovat
@@ -172,6 +190,8 @@ int main(int argc, char** argv) {
         for (int i = 0; i < counter; i++) {
             pthread_cancel(thrRecv[i]);
         }
+        
+        pthread_cancel(thrRouteExp);
     }
 
     // znic mutex

@@ -76,7 +76,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
                 inet_ntop(AF_INET6, &paSourceIp, sourceIp, INET6_ADDRSTRLEN);
                 
                 //teraz musime zmazat zaznam v linuxe
-                sprintf(command, "sudo ip -6 route del %s via %s dev %s", ip, sourceIp, tableRoute->nextHopInt);
+                sprintf(command, "sudo ip -6 route del %s/%d via %s dev %s", ip, tableRoute->prefixLen, sourceIp, tableRoute->nextHopInt);
                 // posli prikaz do linuxu
                 system(command);
                

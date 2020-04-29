@@ -7,7 +7,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/student/NetBeansProjects/AvS_SEM/recvRoutes.c</file>
+            <file>file:/home/student/NetBeansProjects/AvS_SEM/main.c</file>
+            <file>file:/home/student/NetBeansProjects/AvS_SEM/routeExpiration.c</file>
+            <file>file:/home/student/NetBeansProjects/AvS_SEM/routeTable.c</file>
+            <file>file:/home/student/NetBeansProjects/AvS_SEM/entriesListener.c</file>
         </group>
     </open-files>
 </project-private>
