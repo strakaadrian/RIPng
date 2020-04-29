@@ -31,8 +31,7 @@ extern "C" {
 struct routeTable * createRouteTable();
 // pridanie do pomocnej smerovacej tabulky, netreba nam next hop
 struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_addr paPrefix, uint8_t paPrefixLen, uint8_t paMetric, struct in6_addr paSourceIp, char *paNextHopInt, pthread_mutex_t paLock);
-// TODO addRoute() - budu tu muset byt overenia ci uz zaznamy existuju
-void printPomRouteTable(struct routeTable * paTable);
+void printRouteTable(struct routeTable * paTable);
 void destroyRouteTable(struct routeTable * paTable);
 
 

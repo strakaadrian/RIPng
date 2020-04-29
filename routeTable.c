@@ -20,8 +20,6 @@ struct routeTable * createRouteTable() {
     return table;
 }
 
-
-
 struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_addr paPrefix, uint8_t paPrefixLen, uint8_t paMetric, struct in6_addr paSourceIp, char *paNextHopInt, pthread_mutex_t paLock) {
    
     if(paTable == NULL) {
@@ -42,6 +40,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
     route->prefix = paPrefix;
     route->prefixLen = paPrefixLen;
     route->metric = paMetric;
+    route->prefixNextHop = paSourceIp;
     strncpy(route->nextHopInt, paNextHopInt, 10);
     route->time = time(NULL);
     
@@ -89,7 +88,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
                 
                 return route;
                 
-            } else if( (memcmp(&tableRoute->prefix, &route->prefix, sizeof(struct in6_addr)) == 0) && (tableRoute->prefixLen == route->prefixLen) && ( strcmp(tableRoute->nextHopInt, route->nextHopInt) == 0) && (tableRoute->metric == route->metric) ) {
+            } else if( (tableRoute->metric == route->metric) ) {
                 // ak pride identicky zaznam len mu daj cas na aktualny nech sa mu nezmaze zaznam
                 
                 //zamnkni mutex
@@ -140,35 +139,38 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
 }
 
 // vypisanie pomocnej smerovacej tabluky | len pre testovacie uceli
-void printPomRouteTable(struct routeTable * paTable) {
+void printRouteTable(struct routeTable * paTable) {
     if(paTable == NULL) {
         printf("ERROR: Tabulka neexistuje");
 	return;
     }
     
     struct Route * route = NULL;
+    char command[200];
     route = paTable->head;
 
-    printf("| Origin |         Address        | Length | Metric\n");
+    printf("\n*************** IPv6 ROUTING TABLE ***************\n");
 
     while(route != NULL) {
             char prefix[INET6_ADDRSTRLEN];
-
-            printf("| %c |", route->origin);
-
+            char nextHop[INET6_ADDRSTRLEN];
+            
+            memset(command, 0, 200);
+            
+            // vyrob string z IPv6
             inet_ntop(AF_INET6, &route->prefix, prefix, sizeof(prefix));
-            printf(" %s |", prefix);
-
-            printf("   %hhu   |", route->prefixLen);
-
-            printf("  %hhu \n", route->metric);
+            
+            // vyrob string z IPv6
+            inet_ntop(AF_INET6, &route->prefixNextHop, nextHop, sizeof(prefix));
+    
+            // poskladaj smerovaci zaznam
+            sprintf(command, "%s/%d via %s dev %s metric %d timestamp %ld sec.", prefix, route->prefixLen, nextHop, route->nextHopInt, route->metric, (time(NULL) - route->time));
+            printf("%s\n", command);
 
             route = route->next;
     }
-    
+    printf("\n**************************************************\n");
 }
-
-
 
 void destroyRouteTable(struct routeTable * paTable) {
     if(paTable == NULL) {

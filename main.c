@@ -95,6 +95,8 @@ int main(int argc, char** argv) {
     
     // vytvorenie struktury, ktora bude obsahovat parametre pre vlakna
     struct threadParams thrParams;
+    thrParams.routes = routes;
+    thrParams.interfaces = interfaces;
     
     // vytvorenie mutexu
     if (pthread_mutex_init(&thrParams.lock, NULL) != 0) 
@@ -112,7 +114,7 @@ int main(int argc, char** argv) {
     pthread_t thrRouteExp; // vlakno pre kontrolu expiracie zaznamov v smerovacej tabulke
     
     // vytvor vlakno pre pocuvanie vstupov od uzivatela
-    if(pthread_create(&thrEntries, NULL, entriesListener, NULL)) {
+    if(pthread_create(&thrEntries, NULL, entriesListener, &thrParams)) {
         printf("Nepodarilo sa vytvorit vlakno\n");
         return(EXIT_FAILURE);
     }
@@ -144,6 +146,7 @@ int main(int argc, char** argv) {
                 strcpy(thrRecvParams.intName, interface->intName);
                 thrRecvParams.routes = routes;
                 thrRecvParams.interfaces = interfaces;
+                thrRecvParams.lock = thrParams.lock;
                 
                 // pre kazde vlakno si pripravime ja parametre
                 thrParamsArr[counter] = thrRecvParams;

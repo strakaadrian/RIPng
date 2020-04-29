@@ -15,6 +15,7 @@
 #define ENTRIESLISTENER_H
 
 #include "structures.h"
+#include "routeTable.h"
 
 #include <stdio.h>
 #include <stdlib.h>

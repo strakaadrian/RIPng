@@ -9,7 +9,10 @@
 #define INPUT_SIZE 200
 #define COMM_SIZE 20
 
-void *entriesListener(void *unused) {
+void *entriesListener(void *par) {
+    // dostaneme nasu strukturu s parametrami, ktore sme poslali vlaknu
+    struct threadParams * paThrParams = (struct threadParams *) par;
+    
     char input[INPUT_SIZE]; // vstup od uzivatela
     memset(&input, 0, INPUT_SIZE);
     
@@ -29,6 +32,11 @@ void *entriesListener(void *unused) {
         if( (strcmp(input, "ip -6 route") == 0) || (strcmp(input, "ip -6 r") == 0) ) {
             strcpy( command, "ip -6 r");
             system(command);
+            continue;
+        }
+        // ak chceme vypisat smerovaciu tabulku
+        if(strcmp(input, "print table") == 0) {
+            printRouteTable(paThrParams->routes);
             continue;
         }
         
