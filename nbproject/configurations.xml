@@ -9,6 +9,7 @@
       <itemPath>recvRoutes.h</itemPath>
       <itemPath>routeExpiration.h</itemPath>
       <itemPath>routeTable.h</itemPath>
+      <itemPath>sendRoutes.h</itemPath>
       <itemPath>structures.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -24,6 +25,7 @@
       <itemPath>recvRoutes.c</itemPath>
       <itemPath>routeExpiration.c</itemPath>
       <itemPath>routeTable.c</itemPath>
+      <itemPath>sendRoutes.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -84,6 +86,10 @@
       </item>
       <item path="routeTable.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="sendRoutes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="sendRoutes.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="structures.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
@@ -129,6 +135,10 @@
       <item path="routeTable.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="routeTable.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sendRoutes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="sendRoutes.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="structures.h" ex="false" tool="3" flavor2="0">
       </item>

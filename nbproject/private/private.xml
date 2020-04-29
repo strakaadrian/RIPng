@@ -9,8 +9,8 @@
         <group>
             <file>file:/home/student/NetBeansProjects/AvS_SEM/main.c</file>
             <file>file:/home/student/NetBeansProjects/AvS_SEM/routeExpiration.c</file>
-            <file>file:/home/student/NetBeansProjects/AvS_SEM/routeTable.c</file>
-            <file>file:/home/student/NetBeansProjects/AvS_SEM/entriesListener.c</file>
+            <file>file:/home/student/NetBeansProjects/AvS_SEM/structures.h</file>
+            <file>file:/home/student/NetBeansProjects/AvS_SEM/recvRoutes.c</file>
         </group>
     </open-files>
 </project-private>

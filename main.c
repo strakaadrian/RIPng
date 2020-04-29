@@ -16,6 +16,7 @@
 #include "entriesListener.h"
 #include "recvRoutes.h"
 #include "routeExpiration.h"
+#include "sendRoutes.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -130,6 +131,12 @@ int main(int argc, char** argv) {
         return(EXIT_FAILURE);
     }
     
+    //posielanie smerovacich zaznamov
+    if(pthread_create(&thrSend, NULL, sendRoutes, &thrParams)) {
+        printf("Nepodarilo sa vytvorit vlakno\n");
+        return(EXIT_FAILURE);
+    }
+    
     
     // pocitadlo pre nasledujuci cyklus
     int counter = 0;
@@ -177,35 +184,25 @@ int main(int argc, char** argv) {
     
     //TODO pridaj vlakno pre posielanie
     
-    
-    
-    
     // ak joineme vlakno pre pocuvanie od usera tak znicime vsetky ostatne vlakna
     if(pthread_join(thrEntries, NULL) == 0) {
-        //TODO odkomentovat
-        //pthread_cancel(thrSend);
-        //pthread_cancel(thrRouteExp);
-        
         // znicime vsetky vlakna pre pocuvanie 
         for (int i = 0; i < counter; i++) {
             pthread_cancel(thrRecv[i]);
         }
         
         pthread_cancel(thrRouteExp);
+        pthread_cancel(thrSend);
     }
 
     // znic mutex
     pthread_mutex_destroy(&thrParams.lock);
     
-    
 
-    printIntTable(interfaces);
-    
     destroyIntTable(interfaces);
     destroyRouteTable(routes);
     
-    
-    
+
     return (EXIT_SUCCESS);
 }
 

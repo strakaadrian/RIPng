@@ -40,7 +40,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/recvRoutes.o \
 	${OBJECTDIR}/routeExpiration.o \
-	${OBJECTDIR}/routeTable.o
+	${OBJECTDIR}/routeTable.o \
+	${OBJECTDIR}/sendRoutes.o
 
 
 # C Compiler Flags
@@ -96,6 +97,11 @@ ${OBJECTDIR}/routeTable.o: routeTable.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/routeTable.o routeTable.c
+
+${OBJECTDIR}/sendRoutes.o: sendRoutes.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -std=c99 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/sendRoutes.o sendRoutes.c
 
 # Subprojects
 .build-subprojects:
