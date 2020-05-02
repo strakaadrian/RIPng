@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
         unsigned int intIndex = 0;
         char intName[10];
         struct in6_addr prefix;
+        struct in6_addr prefixLL;
         uint8_t prefixLen = 0;
         bool rip = 0;
         bool passive = 0;
@@ -76,13 +77,16 @@ int main(int argc, char** argv) {
         prefixLen = atoi(str);
         
         str = strtok(NULL, " ");
+        inet_pton(AF_INET6, str, &prefixLL);
+        
+        str = strtok(NULL, " ");
         rip = atoi(str);
         
         str = strtok(NULL, " ");
         passive = atoi(str);
         
         // pridanie noveho zaznamu do tabulky interfacov
-        addInterface(interfaces, intIndex, intName, prefix, prefixLen, rip, passive);
+        addInterface(interfaces, intIndex, intName, prefix, prefixLen, prefixLL, rip, passive);
         
         memset(line, 0, LINE_SIZE);
     }
@@ -163,6 +167,7 @@ int main(int argc, char** argv) {
                 memset(&thrRecvParams, 0, sizeof(thrRecvParams));
                 
                 strcpy(thrRecvParams.intName, interface->intName);
+                thrRecvParams.prefixLL = interface->prefixLL;
                 thrRecvParams.routes = routes;
                 thrRecvParams.interfaces = interfaces;
                 thrRecvParams.lock = thrParams.lock;

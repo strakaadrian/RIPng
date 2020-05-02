@@ -32,6 +32,7 @@ struct Interface {
     char intName[10]; // MENU INTRFACU
     struct in6_addr prefix; // IPv6 ADRESA
     uint8_t prefixLen; // ak budeme pouzivat len 128 dlzky, tento atribut nam zrejme netreba
+    struct in6_addr prefixLL; // IPv6 ADRESA LINK LOCAL
     bool rip; // JE, ALEBO NIEJE ZAPNUTE RIP NA DANOM INTERFACE
     bool passiveInt; // JE ROZHRANIE PASIVNE ?
 };
@@ -81,6 +82,7 @@ struct threadParams {
     struct intTable * interfaces; // tabulka rozhrani
     struct routeTable * routes; // smerovacia tabulka
     char intName[10]; // MENU INTRFACU
+    struct in6_addr prefixLL; // LL adresa interfacu
     pthread_mutex_t lock; // mutex
 };
 

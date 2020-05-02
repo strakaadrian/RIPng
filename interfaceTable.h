@@ -28,7 +28,7 @@ extern "C" {
 #endif
 
 struct intTable * createIntTable();
-struct Interface * addInterface(struct intTable * paTable, unsigned int paIntIndex, char * paIntName, struct in6_addr paPrefix, uint8_t paPrefixLen, bool paRip, bool paPassive);
+struct Interface * addInterface(struct intTable * paTable, unsigned int paIntIndex, char * paIntName, struct in6_addr paPrefix, uint8_t paPrefixLen, struct in6_addr paPrefixLL, bool paRip, bool paPassive);
 void printIntTable(struct intTable * paTable);
 void destroyIntTable(struct intTable * paTable);
 

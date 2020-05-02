@@ -84,38 +84,39 @@ void * recvRoutes(void *par) {
 	memset(buf, 0, BUFF_SIZE);
 	int addr_len = sizeof(addr);
 	readLen = recvfrom(sock, buf, BUFF_SIZE, 0, (struct sockaddr *) &addr, &addr_len);
-          
-        //SPRACOVANIE RIPng HLAVICKY
-        // buffer ideme prerobit na RIPng strukturu 
-        struct ripHdr *hdr;
-        hdr = (struct ripHdr *)buf;
         
-        // odcitame od celkoveho buffera velkost hlavicky
-        readLen -= sizeof(struct ripHdr);
-        
-        // teraz ideme spracovavat RIPng smerovacie zaznamy
-        struct ripEntry *entry;
-        struct ripEntry *nextHop;
-        
-        //vlozime si do entry prvu polozku
-        entry = (struct ripEntry *)hdr->entry;
-        
-        // teraz ideme v cykle spracovavat RIPng Entries
-        while(readLen >= sizeof(struct ripEntry)) {
-            
-            if(entry->metric < 16) {
-                // zvys metriku o 1
-                entry->metric++;
-                
-                addRoute(paThrParams->routes, 'R', entry->prefix, entry->prefixLen, entry->metric, addr.sin6_addr ,paThrParams->intName, paThrParams->lock);
-            }
-            
-            
-            readLen -= sizeof(struct ripEntry);
-            //posuniem sa na dalsiu polozku
-            entry++;
-        }
-        
+        // spracovavam len ked mi neprida spraa odomna
+        if(memcmp(&paThrParams->prefixLL, &addr.sin6_addr, sizeof(struct in6_addr)) != 0) {
+                //SPRACOVANIE RIPng HLAVICKY
+            // buffer ideme prerobit na RIPng strukturu 
+            struct ripHdr *hdr;
+            hdr = (struct ripHdr *)buf;
 
+            // odcitame od celkoveho buffera velkost hlavicky
+            readLen -= sizeof(struct ripHdr);
+
+            // teraz ideme spracovavat RIPng smerovacie zaznamy
+            struct ripEntry *entry;
+            struct ripEntry *nextHop;
+
+            //vlozime si do entry prvu polozku
+            entry = (struct ripEntry *)hdr->entry;
+
+            // teraz ideme v cykle spracovavat RIPng Entries
+            while(readLen >= sizeof(struct ripEntry)) {
+
+                if(entry->metric < 16) {
+                    // zvys metriku o 1
+                    entry->metric++;
+
+                    addRoute(paThrParams->routes, 'R', entry->prefix, entry->prefixLen, entry->metric, addr.sin6_addr ,paThrParams->intName, paThrParams->lock);
+                }
+
+
+                readLen -= sizeof(struct ripEntry);
+                //posuniem sa na dalsiu polozku
+                entry++;
+            }
+        } 
     }
 }
