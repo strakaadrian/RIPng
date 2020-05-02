@@ -52,7 +52,7 @@ void * sendRoutes(void * par) {
             hdr.empty = 0;
             
             //zvys velkost
-            buffSize += sizeof(struct ripHdr);
+            buffSize += sizeof(struct ripHdr) + sizeof(struct ripEntry);
             
             // pridaj hlavicku do buffera
             memcpy(buffer, &hdr, sizeof(struct ripHdr));
@@ -85,6 +85,21 @@ void * sendRoutes(void * par) {
             while(interface != NULL) {
                 // skontrolujeme ci ma interface zapnute RIPng
                 if(interface->rip == true) {
+                    //--------------------------------------------
+                    // pridanie prveho divneho zaznamu
+                    //vynuluj
+                    memset(&entry, 0, sizeof(struct ripEntry));
+                    entry.metric = 16;
+                    entry.prefixLen = interface->prefixLen;
+                    entry.routeTag = 0; // NETUSIM CO TU MA BYT ASI 0
+                    inet_pton(AF_INET6, "2001:db8:1::", &entry.prefix);
+                    
+                    // pridaj do buffera dany zaznam
+                    memcpy( (buffer + sizeof(struct ripHdr)), &entry, sizeof(struct ripEntry));
+                    
+                    //--------------------------------------------
+                    
+                    
                     //teraz vytvorime socket
                     sock = socket(AF_INET6, SOCK_DGRAM, 0);
 
