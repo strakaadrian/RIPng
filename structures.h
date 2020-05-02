@@ -83,6 +83,7 @@ struct threadParams {
     struct routeTable * routes; // smerovacia tabulka
     char intName[10]; // MENU INTRFACU
     struct in6_addr prefixLL; // LL adresa interfacu
+    int socketParam; // bindnuty socket
     pthread_mutex_t lock; // mutex
 };
 

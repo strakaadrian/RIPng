@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
     // deklarovanie premennych  //
     pthread_t thrEntries; // vlakno pre pocuvanie vstupov od uzivatela
     pthread_t thrRecv[RECV_NUMB]; // vlakna pre pocuvanie paketov a vkladanie do smerovacej tabulky
-    pthread_t thrSend; // vlakno pre posielanie updatov
+    //pthread_t thrSend; // vlakno pre posielanie updatov
     pthread_t thrRouteExp; // vlakno pre kontrolu expiracie zaznamov v smerovacej tabulke
     
     
@@ -135,11 +135,7 @@ int main(int argc, char** argv) {
         return(EXIT_FAILURE);
     }
     
-    //posielanie smerovacich zaznamov
-    if(pthread_create(&thrSend, NULL, sendRoutes, &thrParams)) {
-        printf("Nepodarilo sa vytvorit vlakno\n");
-        return(EXIT_FAILURE);
-    }
+    
     
     
     // pocitadlo pre nasledujuci cyklus
@@ -197,7 +193,7 @@ int main(int argc, char** argv) {
         }
         
         pthread_cancel(thrRouteExp);
-        pthread_cancel(thrSend);
+        //pthread_cancel(thrSend);
     }
 
     // znic mutex

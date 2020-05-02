@@ -6,6 +6,7 @@
 
 #include "recvRoutes.h"
 #include "routeTable.h"
+#include "sendRoutes.h"
 
 #define PORT 521
 #define BUFF_SIZE 2000
@@ -13,6 +14,8 @@
 void * recvRoutes(void *par) {
     // dostaneme nasu strukturu s parametrami, ktore sme poslali vlaknu
     struct threadParams * paThrParams = (struct threadParams *) par;
+    
+    pthread_t thrSend; // vlakno pre posielanie updatov
     
     // vytvor socket na ktorom budes pocuvat
     int sock;
@@ -53,6 +56,19 @@ void * recvRoutes(void *par) {
 	printf("Nepodarilo sa priradit socket k adrese");
         perror("Error: ");
 	exit(EXIT_FAILURE);
+    }
+    
+    struct threadParams thrParams;
+    
+    // naplnenie premennych
+    thrParams.routes = paThrParams->routes;
+    thrParams.interfaces = paThrParams->interfaces;
+    thrParams.socketParam = sock;
+    
+    //posielanie smerovacich zaznamov
+    if(pthread_create(&thrSend, NULL, sendRoutes, &thrParams)) {
+        printf("Nepodarilo sa vytvorit vlakno\n");
+        return NULL;
     }
     
     // potrebujeme pridat do multicastovej skupiny

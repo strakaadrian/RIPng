@@ -34,18 +34,6 @@ void * sendRoutes(void * par) {
     addr.sin6_family = AF_INET6;
     addr.sin6_port = htons(PORT);
     inet_pton(AF_INET6, "ff02::9", &addr.sin6_addr);
-    
-    
-    struct sockaddr_in6 sourceAddr;
-    //naplnime si strukturu ADDR
-    sourceAddr.sin6_family = AF_INET6;
-    sourceAddr.sin6_port = htons(PORT);
-    sourceAddr.sin6_addr = in6addr_any;
-    
-    if (bind(sock, (struct sockaddr *) &sourceAddr, sizeof(sourceAddr)) < 0) {
-        perror("bind");
-        exit(1);
-    }
    
     // v nekonecnom cykle posielame kazdych 30 sekund celu smerovaciu tabulku
     for(;;) {
@@ -109,21 +97,9 @@ void * sendRoutes(void * par) {
                     // pridaj do buffera dany zaznam
                     memcpy( (buffer + sizeof(struct ripHdr)), &entry, sizeof(struct ripEntry));
                     
-                    //--------------------------------------------
-                    
-                    
-                    //teraz vytvorime socket
-                    sock = socket(AF_INET6, SOCK_DGRAM, 0);
-
-                    // k socketu priradime interface
-                    if (setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, interface->intName, 10) < 0)
-                    { 
-                        printf("Nepodarilo sa priradit moznosti socketu");
-                        exit(EXIT_FAILURE);
-                    }
 
                     // posli socket    
-                    sendto(sock, buffer, buffSize, 0, (struct sockaddr*)&addr, sizeof(struct sockaddr_in6));    
+                    sendto(paThrParams->socketParam, buffer, buffSize, 0, (struct sockaddr*)&addr, sizeof(struct sockaddr_in6));    
                 }
                 interface = interface->next;
             }
