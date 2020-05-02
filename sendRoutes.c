@@ -35,6 +35,18 @@ void * sendRoutes(void * par) {
     addr.sin6_port = htons(PORT);
     inet_pton(AF_INET6, "ff02::9", &addr.sin6_addr);
     
+    
+    struct sockaddr_in6 sourceAddr;
+    //naplnime si strukturu ADDR
+    sourceAddr.sin6_family = AF_INET6;
+    sourceAddr.sin6_port = htons(PORT);
+    sourceAddr.sin6_addr = in6addr_any;
+    
+    if (bind(sock, (struct sockaddr *) &sourceAddr, sizeof(sourceAddr)) < 0) {
+        perror("bind");
+        exit(1);
+    }
+   
     // v nekonecnom cykle posielame kazdych 30 sekund celu smerovaciu tabulku
     for(;;) {
         // ak je aspom 1 zaznam v smerovacej tabulke, inak nic neposiela
