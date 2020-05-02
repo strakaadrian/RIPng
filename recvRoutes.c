@@ -6,7 +6,6 @@
 
 #include "recvRoutes.h"
 #include "routeTable.h"
-#include "sendRoutes.h"
 
 #define PORT 521
 #define BUFF_SIZE 2000
@@ -14,8 +13,6 @@
 void * recvRoutes(void *par) {
     // dostaneme nasu strukturu s parametrami, ktore sme poslali vlaknu
     struct threadParams * paThrParams = (struct threadParams *) par;
-    
-    pthread_t thrSend; // vlakno pre posielanie updatov
     
     // vytvor socket na ktorom budes pocuvat
     int sock;
@@ -58,19 +55,10 @@ void * recvRoutes(void *par) {
 	exit(EXIT_FAILURE);
     }
     
-    struct threadParams thrParams;
-    
-    // naplnenie premennych
-    thrParams.routes = paThrParams->routes;
-    thrParams.interfaces = paThrParams->interfaces;
-    thrParams.socketParam = sock;
-    
-    //posielanie smerovacich zaznamov
-    if(pthread_create(&thrSend, NULL, sendRoutes, &thrParams)) {
-        printf("Nepodarilo sa vytvorit vlakno\n");
-        return NULL;
-    }
-    
+    // socket pridaj do struktury, potrebujeme ho na posielanie
+    paThrParams->socketParam = sock;
+      
+
     // potrebujeme pridat do multicastovej skupiny
     struct ipv6_mreq multicast;
     memset(&multicast, 0, sizeof(multicast));
@@ -101,7 +89,7 @@ void * recvRoutes(void *par) {
 	int addr_len = sizeof(addr);
 	readLen = recvfrom(sock, buf, BUFF_SIZE, 0, (struct sockaddr *) &addr, &addr_len);
         
-        // spracovavam len ked mi neprida spraa odomna
+        // spracovavam len ked mi neprida sprava odomna
         if(memcmp(&paThrParams->prefixLL, &addr.sin6_addr, sizeof(struct in6_addr)) != 0) {
                 //SPRACOVANIE RIPng HLAVICKY
             // buffer ideme prerobit na RIPng strukturu 
@@ -120,7 +108,7 @@ void * recvRoutes(void *par) {
 
             // teraz ideme v cykle spracovavat RIPng Entries
             while(readLen >= sizeof(struct ripEntry)) {
-
+                // metriku nad 15 nechceme
                 if(entry->metric < 16) {
                     // zvys metriku o 1
                     entry->metric++;

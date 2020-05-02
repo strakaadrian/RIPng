@@ -51,6 +51,19 @@ void * sendRoutes(void * par) {
             hdr.ver = 1;
             hdr.empty = 0;
             
+            // pridaj prvy zaznam a to siet iba
+            //--------------------------------------------
+   
+            //vynuluj
+            memset(&entry, 0, sizeof(struct ripEntry));
+            entry.metric = 16;
+            entry.routeTag = 0; 
+            entry.prefix = paThrParams->prefixNetwork;
+            entry.prefixLen = paThrParams->prefixNetworkLen;
+
+            // pridaj do buffera dany zaznam
+            memcpy( (buffer + sizeof(struct ripHdr)), &entry, sizeof(struct ripEntry));
+            
             //zvys velkost
             buffSize += sizeof(struct ripHdr) + sizeof(struct ripEntry);
             
@@ -78,33 +91,11 @@ void * sendRoutes(void * par) {
                 route = route->next;
             }
             
-            //priradime si prvy prvok z tabulky interfacov
-            interface = paThrParams->interfaces->head;
-
-            // prechadzame tabulku interfacov a zistujeme ci maju zapnute RIPng
-            while(interface != NULL) {
-                // skontrolujeme ci ma interface zapnute RIPng
-                if(interface->rip == true) {
-                    //--------------------------------------------
-                    // pridanie prveho divneho zaznamu
-                    //vynuluj
-                    memset(&entry, 0, sizeof(struct ripEntry));
-                    entry.metric = 16;
-                    entry.prefixLen = interface->prefixLen;
-                    entry.routeTag = 0; // NETUSIM CO TU MA BYT ASI 0
-                    inet_pton(AF_INET6, "2001:db8:1::", &entry.prefix);
-                    
-                    // pridaj do buffera dany zaznam
-                    memcpy( (buffer + sizeof(struct ripHdr)), &entry, sizeof(struct ripEntry));
-                    
-
-                    // posli socket    
-                    sendto(paThrParams->socketParam, buffer, buffSize, 0, (struct sockaddr*)&addr, sizeof(struct sockaddr_in6));    
-                }
-                interface = interface->next;
-            }
-            // cakaj 30 sekund 
-            sleep(30);
+            // posli smerovaciu tabulku cez dany interface
+            sendto(paThrParams->socketParam, buffer, buffSize, 0, (struct sockaddr*)&addr, sizeof(struct sockaddr_in6));    
         }
+        // cakaj 30 sekund 
+        sleep(30);
     }
+    
 }

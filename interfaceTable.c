@@ -21,7 +21,7 @@ struct intTable * createIntTable() {
     return table;
 }
 
-struct Interface * addInterface(struct intTable * paTable, unsigned int paIntIndex, char * paIntName, struct in6_addr paPrefix, uint8_t paPrefixLen, struct in6_addr paPrefixLL, bool paRip, bool paPassive) {
+struct Interface * addInterface(struct intTable * paTable, unsigned int paIntIndex, char * paIntName, struct in6_addr paPrefix, uint8_t paPrefixLen, struct in6_addr paPrefixLL, struct in6_addr paPrefixNetwork, uint8_t paPrefixNetworkLen, bool paRip, bool paPassive) {
     
     if(paTable == NULL) {
         printf("ERROR: Tabulka neexistuje");
@@ -44,6 +44,8 @@ struct Interface * addInterface(struct intTable * paTable, unsigned int paIntInd
     interface->prefixLL = paPrefixLL;
     interface->rip = paRip;
     interface->passiveInt = paPassive;
+    interface->prefixNetwork = paPrefixNetwork;
+    interface->prefixNetworkLen = paPrefixNetworkLen;
     
     
     struct Interface * entry = paTable->head;

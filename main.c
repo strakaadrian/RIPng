@@ -28,6 +28,7 @@
 
 #define LINE_SIZE 250
 #define RECV_NUMB 5
+#define SEND_NUMB 5
 
 /*
  * 
@@ -58,7 +59,9 @@ int main(int argc, char** argv) {
         char intName[10];
         struct in6_addr prefix;
         struct in6_addr prefixLL;
+        struct in6_addr prefixNetwork;
         uint8_t prefixLen = 0;
+        uint8_t prefixNetworkLen = 0;
         bool rip = 0;
         bool passive = 0;
         
@@ -80,13 +83,19 @@ int main(int argc, char** argv) {
         inet_pton(AF_INET6, str, &prefixLL);
         
         str = strtok(NULL, " ");
+        inet_pton(AF_INET6, str, &prefixNetwork);
+        
+        str = strtok(NULL, " ");
+        prefixNetworkLen = atoi(str);
+        
+        str = strtok(NULL, " ");
         rip = atoi(str);
         
         str = strtok(NULL, " ");
         passive = atoi(str);
         
         // pridanie noveho zaznamu do tabulky interfacov
-        addInterface(interfaces, intIndex, intName, prefix, prefixLen, prefixLL, rip, passive);
+        addInterface(interfaces, intIndex, intName, prefix, prefixLen, prefixLL, prefixNetwork, prefixNetworkLen, rip, passive);
         
         memset(line, 0, LINE_SIZE);
     }
@@ -118,7 +127,7 @@ int main(int argc, char** argv) {
     // deklarovanie premennych  //
     pthread_t thrEntries; // vlakno pre pocuvanie vstupov od uzivatela
     pthread_t thrRecv[RECV_NUMB]; // vlakna pre pocuvanie paketov a vkladanie do smerovacej tabulky
-    //pthread_t thrSend; // vlakno pre posielanie updatov
+    pthread_t thrSend[SEND_NUMB]; // vlakna pre posielanie updatov
     pthread_t thrRouteExp; // vlakno pre kontrolu expiracie zaznamov v smerovacej tabulke
     
     
@@ -134,9 +143,6 @@ int main(int argc, char** argv) {
         printf("Nepodarilo sa vytvorit vlakno\n");
         return(EXIT_FAILURE);
     }
-    
-    
-    
     
     // pocitadlo pre nasledujuci cyklus
     int counter = 0;
@@ -164,6 +170,8 @@ int main(int argc, char** argv) {
                 
                 strcpy(thrRecvParams.intName, interface->intName);
                 thrRecvParams.prefixLL = interface->prefixLL;
+                thrRecvParams.prefixNetwork = interface->prefixNetwork;
+                thrRecvParams.prefixNetworkLen = interface->prefixNetworkLen;
                 thrRecvParams.routes = routes;
                 thrRecvParams.interfaces = interfaces;
                 thrRecvParams.lock = thrParams.lock;
@@ -175,21 +183,25 @@ int main(int argc, char** argv) {
                 if(pthread_create(&thrRecv[counter], NULL, recvRoutes, &thrParamsArr[counter])) {
                     printf("Nepodarilo sa vytvorit vlakno\n");
                     return(EXIT_FAILURE);
-                } 
+                }
+                
+                //posielanie smerovacich zaznamov
+                if(pthread_create(&thrSend[counter], NULL, sendRoutes, &thrParamsArr[counter])) {
+                    printf("Nepodarilo sa vytvorit vlakno\n");
+                    return(EXIT_FAILURE);
+                }
             }
             counter++;
             interface = interface->next;
         }      
     }
     
-    
-    //TODO pridaj vlakno pre posielanie
-    
     // ak joineme vlakno pre pocuvanie od usera tak znicime vsetky ostatne vlakna
     if(pthread_join(thrEntries, NULL) == 0) {
         // znicime vsetky vlakna pre pocuvanie 
         for (int i = 0; i < counter; i++) {
             pthread_cancel(thrRecv[i]);
+            pthread_cancel(thrSend[i]);
         }
         
         pthread_cancel(thrRouteExp);
