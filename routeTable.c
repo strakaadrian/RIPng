@@ -182,7 +182,24 @@ void destroyRouteTable(struct routeTable * paTable) {
     
     route = paTable->head;
     
+    char ip[INET6_ADDRSTRLEN];
+    char sourceIp[INET6_ADDRSTRLEN];
+    char command[200];
+    
     while(route != NULL) {
+        
+        // zmazeme aj zaznamy v linuxe
+        memset(command, 0, 200);
+        
+        inet_ntop(AF_INET6, &route->prefix, ip, INET6_ADDRSTRLEN);
+        inet_ntop(AF_INET6, &route->prefixNextHop, sourceIp, INET6_ADDRSTRLEN);
+        
+        //teraz musime zmazat zaznam v linuxe
+        sprintf(command, "sudo ip -6 route del %s/%d via %s dev %s", ip, route->prefixLen, sourceIp, route->nextHopInt);
+        // posli prikaz do linuxu
+        system(command);
+        
+        // zmazeme zaznam zo smerovacej tabulky
 	pom = route;
 	route = route->next;
 	free(pom);
