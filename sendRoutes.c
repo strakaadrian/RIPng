@@ -51,6 +51,10 @@ void * sendRoutes(void * par) {
             hdr.ver = 1;
             hdr.empty = 0;
             
+            // pridaj hlavicku do buffera
+            memcpy(buffer, &hdr, sizeof(struct ripHdr));
+            
+            
             // pridaj prvy zaznam a to siet iba
             //--------------------------------------------
    
@@ -67,9 +71,6 @@ void * sendRoutes(void * par) {
             //zvys velkost
             buffSize += sizeof(struct ripHdr) + sizeof(struct ripEntry);
             
-            // pridaj hlavicku do buffera
-            memcpy(buffer, &hdr, sizeof(struct ripHdr));
-            
             // pridaj prvu entry
             route = paThrParams->routes->head;
             
@@ -80,7 +81,7 @@ void * sendRoutes(void * par) {
                 
                 entry.metric = route->metric;
                 entry.prefixLen = route->prefixLen;
-                entry.routeTag = 0; // NETUSIM CO TU MA BYT ASI 0
+                entry.routeTag = 0;
                 entry.prefix = route->prefix;
                 
                 // pridaj do buffera dany zaznam

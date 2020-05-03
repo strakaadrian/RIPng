@@ -32,6 +32,7 @@
 extern "C" {
 #endif
 
+// funkcia pre posielanie zaznamov zo smerovacje tabulky
 void * sendRoutes(void *par); 
 
 #ifdef __cplusplus

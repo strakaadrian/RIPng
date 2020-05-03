@@ -36,6 +36,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
 	return NULL;
     }
     
+    // naplnenie novovytvoreneho smerovacieho zaznamu pomocou parametrov
     route->origin = paOrigin;
     route->prefix = paPrefix;
     route->prefixLen = paPrefixLen;
@@ -56,7 +57,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
           
         //overenie ci je tam taka siet s rovnakou IP a MASKOU
         if( (memcmp(&tableRoute->prefix, &route->prefix, sizeof(struct in6_addr)) == 0) && (tableRoute->prefixLen == route->prefixLen) && ( strcmp(tableRoute->nextHopInt, route->nextHopInt) == 0) ) {
-            // ak je tam taka siet, ale ma mensiu metriku tak zaznam pridaj za ten zaznam, ktory tam je
+            // ak je tam taka siet, ale ma mensiu metriku tak zaznam pridaj za ten zaznam, ktory tam uz je
             if(route->metric < tableRoute->metric) {
                 
                 //zamnkni mutex
@@ -80,7 +81,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
                 // posli prikaz do linuxu
                 system(command);
                
-                // teraz pridame novy smerovaci zaznam v linuxe
+                // teraz pridame novy smerovaci zaznam v linuxe s novou metrikou
                 memset(command, 0, 200);
                 sprintf(command, "sudo ip -6 route add %s/%d via %s dev %s metric %d", ip, tableRoute->prefixLen, sourceIp, tableRoute->nextHopInt, tableRoute->metric);
                 // posli prikaz do linuxu
@@ -108,6 +109,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
     //zamnkni mutex
     pthread_mutex_lock(&paLock);
     
+    // ak prisiel novy zaznam tak ho pridaj do smerovacej tabulky
     struct Route * entry = paTable->head;
     
     if(entry == NULL) {
@@ -138,7 +140,7 @@ struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_a
     return route;
 }
 
-// vypisanie pomocnej smerovacej tabluky | len pre testovacie uceli
+// vypisanie pomocnej smerovacej tabluky
 void printRouteTable(struct routeTable * paTable) {
     if(paTable == NULL) {
         printf("ERROR: Tabulka neexistuje");

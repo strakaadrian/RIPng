@@ -28,13 +28,13 @@ void *entriesListener(void *par) {
         // z fgets vstupu odrezeme NEWLINE charakter
         strtok(input, "\n");
         
-        // ak chce uzivatel vypisat smerovaciu tabulku
+        // ak chce uzivatel vypisat smerovaciu tabulku linuxu
         if( (strcmp(input, "ip -6 route") == 0) || (strcmp(input, "ip -6 r") == 0) ) {
             strcpy( command, "ip -6 r");
             system(command);
             continue;
         }
-        // ak chceme vypisat smerovaciu tabulku
+        // ak chceme vypisat smerovaciu tabulku lokalnu
         if(strcmp(input, "print table") == 0) {
             printRouteTable(paThrParams->routes);
             continue;

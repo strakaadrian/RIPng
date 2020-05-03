@@ -28,10 +28,13 @@
 extern "C" {
 #endif
 
+// funkcia pre vytvorenie smerovacej tabulky
 struct routeTable * createRouteTable();
-// pridanie do pomocnej smerovacej tabulky, netreba nam next hop
+// pridanie do pomocnej smerovacej tabulky
 struct Route * addRoute(struct routeTable * paTable, char paOrigin, struct in6_addr paPrefix, uint8_t paPrefixLen, uint8_t paMetric, struct in6_addr paSourceIp, char *paNextHopInt, pthread_mutex_t paLock);
+// vypisanie pomocnej smerovacej tabulky
 void printRouteTable(struct routeTable * paTable);
+// znicenie pomocnej smerovacej tabulky
 void destroyRouteTable(struct routeTable * paTable);
 
 

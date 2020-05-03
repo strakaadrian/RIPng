@@ -78,7 +78,6 @@ void * checkExpiration(void * par) {
                         continue;   
                     } 
                 } else {
-                    //ak je to zaznam zo stredu napr
                     if(route->next == NULL) {
                         //ak idem mazat posledny zaznam tak staci len predosli nastavit na NULL
                         pomRoute->next = NULL;

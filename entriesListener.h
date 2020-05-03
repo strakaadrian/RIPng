@@ -27,6 +27,7 @@
 extern "C" {
 #endif
 
+// funkcia pre pocuvanie vstupov od uzivatela
 void *entriesListener(void *par);
 
 

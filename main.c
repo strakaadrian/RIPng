@@ -69,28 +69,36 @@ int main(int argc, char** argv) {
         //////////////////////////////////
         
         //parsovanie jedneho riadku
+        // parsovanie nazvu interfacu
         char *str = strtok(line, " "); 
         intIndex = if_nametoindex(str);
         strncpy(intName, str, strlen(str));
         
+        // parsovanie IPv6 adresy interfacu
         str = strtok(NULL, " ");
         inet_pton(AF_INET6, str, &prefix);
         
+        // parsovanie prefix length IPv6 adresy
         str = strtok(NULL, " ");
         prefixLen = atoi(str);
         
+        // parsovanie link local adresy
         str = strtok(NULL, " ");
         inet_pton(AF_INET6, str, &prefixLL);
         
+        // parsovanie siete kam patri interface
         str = strtok(NULL, " ");
         inet_pton(AF_INET6, str, &prefixNetwork);
         
+        // parsovanie dlzky prefixu siete kam patri interface
         str = strtok(NULL, " ");
         prefixNetworkLen = atoi(str);
         
+        // parsovanie RIPng
         str = strtok(NULL, " ");
         rip = atoi(str);
         
+        // parsovanie passive interface
         str = strtok(NULL, " ");
         passive = atoi(str);
         
@@ -106,11 +114,10 @@ int main(int argc, char** argv) {
     // vytvorenie struktury smerovacej tabulky
     struct routeTable * routes = createRouteTable();
     
-    // VYTVARANIE MUTEXU //
-    
     // vytvorenie struktury, ktora bude obsahovat parametre pre vlakna
     struct threadParams thrParams;
 
+    // VYTVARANIE MUTEXU //
     // vytvorenie mutexu
     if (pthread_mutex_init(&thrParams.lock, NULL) != 0) 
     { 
@@ -168,6 +175,7 @@ int main(int argc, char** argv) {
                 struct threadParams thrRecvParams;
                 memset(&thrRecvParams, 0, sizeof(thrRecvParams));
                 
+                // naplname strukturu parametrami, ktoru posleme danemu vlaknu tieto struktury budu mat ine parametre v zavyslosti od interfacu
                 strcpy(thrRecvParams.intName, interface->intName);
                 thrRecvParams.prefixLL = interface->prefixLL;
                 thrRecvParams.prefixNetwork = interface->prefixNetwork;
@@ -176,7 +184,7 @@ int main(int argc, char** argv) {
                 thrRecvParams.interfaces = interfaces;
                 thrRecvParams.lock = thrParams.lock;
                 
-                // pre kazde vlakno si pripravime ja parametre
+                // danu strukturu si odlozime do pola na danu poziciu
                 thrParamsArr[counter] = thrRecvParams;
                 
                 // vytvor vlakno pre pocuvanie paketov
@@ -185,7 +193,7 @@ int main(int argc, char** argv) {
                     return(EXIT_FAILURE);
                 }
                 
-                //posielanie smerovacich zaznamov
+                //vlakno pre posielanie smerovacich zaznamov
                 if(pthread_create(&thrSend[counter], NULL, sendRoutes, &thrParamsArr[counter])) {
                     printf("Nepodarilo sa vytvorit vlakno\n");
                     return(EXIT_FAILURE);
@@ -205,13 +213,12 @@ int main(int argc, char** argv) {
         }
         
         pthread_cancel(thrRouteExp);
-        //pthread_cancel(thrSend);
     }
 
     // znic mutex
     pthread_mutex_destroy(&thrParams.lock);
     
-
+    // uvolni pamat po oboch tabulkach
     destroyIntTable(interfaces);
     destroyRouteTable(routes);
     

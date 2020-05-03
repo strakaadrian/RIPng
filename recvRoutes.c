@@ -55,14 +55,12 @@ void * recvRoutes(void *par) {
 	exit(EXIT_FAILURE);
     }
     
-    // socket pridaj do struktury, potrebujeme ho na posielanie
+    // socket pridaj do struktury, potrebujeme ho na posielanie inak by som nedokazal posielat na rovnakom rozhrani
     paThrParams->socketParam = sock;
-      
 
     // potrebujeme pridat do multicastovej skupiny
     struct ipv6_mreq multicast;
     memset(&multicast, 0, sizeof(multicast));
-    //multicast.ipv6mr_multiaddr = in6addr_any; // chceme pocuvat na hociktorom rozhrani
     
     multicast.ipv6mr_interface = if_nametoindex(paThrParams->intName); // vsetky rozhrania
     
@@ -72,26 +70,27 @@ void * recvRoutes(void *par) {
 	exit(EXIT_FAILURE);
     }
     
-    //TODO musime joinovat podle int tabulky vsetky interfacy ktore su zapojene takze nejake FOR
-    
     // nastavenie parametrov pre SOCK, to su nejake dodatocne parametre, ktore vieme pre socket nastavit
+    // konkretne ho pridam do multikastovej skupiny
     if(setsockopt(sock, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, &multicast, sizeof(struct ipv6_mreq) ) == -1) {
         printf("Nepodarilo sa priradit dodatocne parametre socketu");
 	exit(EXIT_FAILURE);
     }
  
-    // teraz ideme pocuvat pakety
+    // teraz ideme pocuvat pakety v nekonecnom cykle
     for(;;) {
         char buf[BUFF_SIZE];
 	int readLen = 0;
 
 	memset(buf, 0, BUFF_SIZE);
 	int addr_len = sizeof(addr);
+        
+        // pocuvame packet od suseda
 	readLen = recvfrom(sock, buf, BUFF_SIZE, 0, (struct sockaddr *) &addr, &addr_len);
         
-        // spracovavam len ked mi neprida sprava odomna
+        // spracovavam len ked mi prisiel RIPng zaznam, ktory som sam neodoslal
         if(memcmp(&paThrParams->prefixLL, &addr.sin6_addr, sizeof(struct in6_addr)) != 0) {
-                //SPRACOVANIE RIPng HLAVICKY
+            //SPRACOVANIE RIPng HLAVICKY
             // buffer ideme prerobit na RIPng strukturu 
             struct ripHdr *hdr;
             hdr = (struct ripHdr *)buf;
@@ -112,11 +111,12 @@ void * recvRoutes(void *par) {
                 if(entry->metric < 16) {
                     // zvys metriku o 1
                     entry->metric++;
-
+                    
+                    // pridaj smerovaci zaznam do tabulky linuxu aj lokalnej smerovacej tabulky
                     addRoute(paThrParams->routes, 'R', entry->prefix, entry->prefixLen, entry->metric, addr.sin6_addr ,paThrParams->intName, paThrParams->lock);
                 }
 
-
+                // spravu ktora prisla zmensime o zaznam, ktory sme uz precitali
                 readLen -= sizeof(struct ripEntry);
                 //posuniem sa na dalsiu polozku
                 entry++;

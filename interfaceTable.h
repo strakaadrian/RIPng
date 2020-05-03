@@ -27,9 +27,13 @@
 extern "C" {
 #endif
 
+// funkcia pre vytvorenie smerovacej tabulky
 struct intTable * createIntTable();
+// funkcia pre pridanie rozhrania
 struct Interface * addInterface(struct intTable * paTable, unsigned int paIntIndex, char * paIntName, struct in6_addr paPrefix, uint8_t paPrefixLen, struct in6_addr paPrefixLL, struct in6_addr paPrefixNetwork, uint8_t paPrefixNetworkLen, bool paRip, bool paPassive);
+// funkcia pre vypisanie tabulky rozhrani
 void printIntTable(struct intTable * paTable);
+//funkcia pre uvolnenie pamete a znicenie tabulky rozhrani
 void destroyIntTable(struct intTable * paTable);
 
 #ifdef __cplusplus

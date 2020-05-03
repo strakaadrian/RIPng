@@ -33,6 +33,7 @@
 extern "C" {
 #endif
 
+// funkcia pre primanie smerovacich zaznamov
 void * recvRoutes(void *par); 
 
 

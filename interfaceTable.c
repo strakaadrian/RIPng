@@ -37,6 +37,7 @@ struct Interface * addInterface(struct intTable * paTable, unsigned int paIntInd
 	return NULL;
     }
     
+    // pridanie pomocnych premennych do novovytvoreneho interfacu
     interface->intId = paIntIndex;
     strcpy(interface->intName, paIntName);
     interface->prefix = paPrefix;
@@ -106,11 +107,13 @@ void destroyIntTable(struct intTable * paTable) {
     
     interface = paTable->head;
     
+    // odstran zaznamy z tabulky jeden po druhom
     while(interface != NULL) {
 	pom = interface;
 	interface = interface->next;
+        // uvolni pamat po zazname
 	free(pom);
     }
-
+    // uvolni pamat po tabulke
     free(paTable);
 }

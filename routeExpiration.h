@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 
-
+// funkcia pre kontrolu, ci dany smerovaci zaznam este neexpiroval (timestamp 180s +)
 void * checkExpiration(void * par);
     
 
