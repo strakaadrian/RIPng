@@ -1,2 +1,2 @@
 # AvS_SEM
-Semestrálna práca k predmetu AvS. Router RIPng.
+Main goal of this project was to create wirking RIPng router, that will be working on Linux OS.
